@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KomikQuest — Baca, Main, Belajar!</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: #f5f3ff;
+    }
+
+    [hidden] { display: none !important; }
+    button, summary { cursor: pointer; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+
+    :focus-visible {
+      outline: 3px solid #f59e0b;
+      outline-offset: 4px;
+    }
+
+    .field {
+      width: 100%;
+      border: 1px solid #d4d4e0;
+      border-radius: 12px;
+      padding: 12px;
+      background: white;
+    }
+
+    .btn {
+      border-radius: 14px;
+      padding: 12px 20px;
+      font-weight: 750;
+    }
+
+    .answer {
+      min-height: 100px;
+      border: 3px solid transparent;
+      border-radius: 18px;
+      padding: 20px;
+      text-align: left;
+      font-weight: 700;
+      color: white;
+      overflow-wrap: anywhere;
+    }
+
+    .answer:disabled { opacity: 1; }
+
+    .answer.correct {
+      border-color: #fff;
+      outline: 4px solid #86efac;
+    }
+
+    .answer.wrong { opacity: .5; }
+
+    dialog {
+      width: min(820px, calc(100% - 24px));
+      max-height: 92dvh;
+      border: 0;
+      border-radius: 28px;
+      padding: 0;
+    }
+
+    dialog::backdrop { background: rgb(26 19 59 / .78); }
+
+    iframe {
+      width: 100%;
+      height: 65vh;
+      min-height: 360px;
+      border: 0;
+      background: #e2e8f0;
+    }
+
+    progress { accent-color: #fbbf24; }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="text-slate-800">
+  <header class="bg-white border-b border-violet-100">
+    <div class="max-w-6xl mx-auto px-5 py-5 flex flex-wrap gap-4 items-center justify-between">
+      <a href="#" class="text-2xl font-black text-violet-700">
+        ✦ KomikQuest
+      </a>
+      <span class="text-sm font-semibold text-slate-500">
+        Baca cerita. Raih pengetahuan!
+      </span>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <div class="flex flex-wrap justify-between gap-5 items-end mb-8">
+      <div>
+        <p class="text-xs font-bold tracking-widest text-violet-600 mb-2">
+          PETUALANGAN BELAJAR
+        </p>
+        <h1 class="text-3xl sm:text-4xl font-black">
+          Cerita seru, belajar makin asyik.
+        </h1>
+      </div>
+
+      <nav
+        aria-label="Pilih dashboard"
+        class="flex gap-2 bg-white rounded-2xl p-2 shadow-sm"
+      >
+        <button
+          id="teacher-tab"
+          class="btn bg-violet-700 text-white"
+          aria-pressed="true"
+          aria-controls="teacher"
+        >
+          🎨 Guru
+        </button>
+        <button
+          id="student-tab"
+          class="btn text-slate-600"
+          aria-pressed="false"
+          aria-controls="student"
+        >
+          🚀 Siswa
+        </button>
+      </nav>
+    </div>
+
+    <!-- DASHBOARD GURU -->
+    <section id="teacher" aria-labelledby="teacher-heading">
+      <div class="bg-violet-100 rounded-2xl p-5 mb-6">
+        <h2 id="teacher-heading" class="font-bold text-xl">
+          Studio Guru
+        </h2>
+        <p class="text-sm mt-1">
+          Siapkan PDF komik, buat tantangan, lalu coba bersama siswa.
+        </p>
+      </div>
+
+      <form id="lesson-form">
+        <fieldset id="editor" class="grid lg:grid-cols-5 gap-6">
+          <div class="lg:col-span-2 bg-white rounded-3xl p-6 border border-violet-100 self-start">
+            <h3 class="font-bold text-xl mb-6">01 · Siapkan komik</h3>
+
+            <label for="lesson-title" class="block font-semibold mb-2">
+              Judul materi
+            </label>
+            <input
+              id="lesson-title"
+              class="field mb-6"
+              required
+              maxlength="120"
+              placeholder="Contoh: Petualangan Mengenal Malaikat"
+            >
+
+            <label for="pdf-file" class="block font-semibold mb-2">
+              PDF komik pembelajaran
+            </label>
+
+            <div class="border-2 border-dashed border-violet-200 rounded-2xl p-5 bg-violet-50">
+              <div class="text-4xl mb-3" aria-hidden="true">📚</div>
+              <p class="font-bold mb-3">Pilih cerita untuk hari ini</p>
+
+              <input
+                id="pdf-file"
+                type="file"
+                accept="application/pdf,.pdf"
+                required
+                class="w-full text-sm"
+                aria-describedby="pdf-help"
+              >
+
+              <p id="pdf-help" class="text-xs text-slate-500 mt-3">
+                Satu berkas PDF, maksimal 10 MB.
+              </p>
+            </div>
+
+            <p
+              id="file-name"
+              class="text-sm text-violet-700 mt-3 break-words"
+              role="status"
+            >
+              Belum ada PDF dipilih.
+            </p>
+
+            <p class="text-sm text-slate-500 mt-6 leading-relaxed">
+              💡 Gunakan nama file yang jelas dan teks komik yang mudah dibaca.
+            </p>
+          </div>
+
+          <div class="lg:col-span-3 bg-white rounded-3xl p-6 border border-violet-100">
+            <div class="flex justify-between items-center gap-3 mb-5">
+              <h3 class="font-bold text-xl">02 · Buat tantangan</h3>
+              <span class="text-xs bg-amber-100 text-amber-900 px-3 py-2 rounded-full">
+                20 detik / soal
+              </span>
+            </div>
+
+            <div id="questions" class="space-y-5"></div>
+
+            <button
+              id="add-question"
+              type="button"
+              class="btn w-full bg-violet-50 text-violet-700 mt-5"
+            >
+              + Tambah soal
+            </button>
+
+            <button
+              id="save-button"
+              type="submit"
+              class="btn w-full bg-violet-700 text-white mt-4"
+            >
+              Simpan &amp; Bagikan ✨
+            </button>
+
+            <p class="text-xs text-slate-500 mt-3">
+              Prototipe: data dicetak ke console dan tersedia di dashboard siswa
+              pada tab ini. Belum membuat tautan berbagi.
+            </p>
+          </div>
+        </fieldset>
+
+        <p
+          id="save-status"
+          class="mt-4 font-semibold text-violet-800"
+          role="status"
+        ></p>
+      </form>
+    </section>
+
+    <!-- DASHBOARD SISWA -->
+    <section id="student" hidden aria-labelledby="student-heading">
+      <div class="flex flex-wrap justify-between gap-3 items-center mb-5">
+        <div>
+          <p class="text-sm text-violet-600 font-bold mb-1">
+            MISI PERTAMA: BACA CERITANYA
+          </p>
+          <h2 id="student-heading" class="text-2xl font-black">
+            Ruang Baca Komik
+          </h2>
+        </div>
+
+        <span
+          id="lesson-badge"
+          class="bg-white rounded-full px-4 py-2 text-sm"
+        >
+          Belum ada materi
+        </span>
+      </div>
+
+      <article class="bg-white rounded-3xl border border-violet-100 p-3 sm:p-5 overflow-hidden">
+        <div
+          id="pdf-placeholder"
+          class="min-h-96 rounded-2xl bg-gradient-to-br from-violet-100 to-sky-100 flex flex-col items-center justify-center text-center p-8"
+        >
+          <div class="text-7xl mb-6" aria-hidden="true">📖</div>
+          <h3 class="text-2xl font-black mb-3">
+            Petualanganmu segera dimulai!
+          </h3>
+          <p class="max-w-md text-slate-600">
+            Belum ada komik. Buka dashboard Guru, pilih PDF dan buat soal,
+            lalu tekan Simpan &amp; Bagikan.
+          </p>
+        </div>
+
+        <iframe
+          id="pdf-viewer"
+          title="Dokumen PDF komik pembelajaran"
+          hidden
+        ></iframe>
+
+        <a
+          id="pdf-link"
+          target="_blank"
+          rel="noopener"
+          class="inline-block text-sm text-violet-700 underline mt-3"
+          hidden
+        >
+          Buka PDF di tab baru jika pembaca tidak tampil
+        </a>
+      </article>
+
+      <div class="text-center py-8">
+        <p class="text-slate-600 mb-4">
+          Sudah membaca? Saatnya menguji pemahamanmu!
+        </p>
+        <button
+          id="start-quiz"
+          class="btn bg-violet-700 text-white text-lg shadow-lg shadow-violet-200"
+          disabled
+        >
+          ⚡ Mulai Kuis Instan
+        </button>
+        <p class="text-xs text-slate-500 mt-3">
+          100 poin untuk setiap jawaban benar · 20 detik per soal
+        </p>
+      </div>
+    </section>
+
+    <footer class="text-center text-xs text-slate-500 mt-10">
+      KomikQuest · Belajar lewat cerita · Materi sesi ini hilang saat halaman
+      dimuat ulang.
+    </footer>
+  </main>
+
+  <!-- Dialog native mendukung fokus dan keyboard -->
+  <dialog id="quiz-dialog" aria-labelledby="quiz-heading">
+    <div class="bg-violet-950 text-white p-5 sm:p-8">
+      <div class="flex items-center justify-between gap-4 mb-6">
+        <span class="text-sm font-semibold text-violet-200">
+          ✦ TANTANGAN KOMIKQUEST
+        </span>
+        <button
+          id="close-quiz"
+          type="button"
+          class="rounded-xl bg-white/10 px-3 py-2"
+          aria-label="Tutup kuis"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div id="quiz-play">
+        <div class="flex justify-between items-center gap-4 mb-3">
+          <span id="question-number" class="text-sm"></span>
+          <span
+            id="timer"
+            role="timer"
+            aria-label="Sisa waktu"
+            class="text-2xl font-black bg-white/10 rounded-2xl px-4 py-2"
+          >
+            20 dtk
+          </span>
+          <span id="score" class="font-bold">0 poin</span>
+        </div>
+
+        <progress
+          id="timer-bar"
+          max="20"
+          value="20"
+          class="w-full h-3 mb-6"
+          aria-label="Sisa waktu menjawab"
+        ></progress>
+
+        <h2
+          id="quiz-heading"
+          tabindex="-1"
+          class="text-2xl sm:text-3xl font-black leading-snug mb-7 break-words"
+        >
+          Pertanyaan
+        </h2>
+
+        <div id="answer-options" class="grid sm:grid-cols-2 gap-4"></div>
+
+        <p
+          id="feedback"
+          role="status"
+          class="mt-6 rounded-2xl p-4 bg-white/10"
+          hidden
+        ></p>
+
+        <button
+          id="next-question"
+          class="btn bg-white text-violet-900 w-full mt-4"
+          hidden
+        >
+          Soal berikutnya →
+        </button>
+      </div>
+
+      <div id="quiz-result" class="text-center py-6" hidden>
+        <div class="text-6xl mb-5" aria-hidden="true">🏆</div>
+        <h2 id="result-heading" tabindex="-1" class="text-3xl font-black">
+          Misi selesai!
+        </h2>
+        <p
+          id="final-score"
+          class="text-5xl font-black text-amber-300 my-6"
+        ></p>
+        <p id="result-summary" class="text-violet-100 mb-7"></p>
+
+        <div class="flex flex-wrap justify-center gap-3">
+          <button
+            id="retry-quiz"
+            class="btn bg-amber-300 text-violet-950"
+          >
+            Coba lagi
+          </button>
+          <button
+            id="back-reading"
+            class="btn bg-white/10 text-white"
+          >
+            Kembali membaca
+          </button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    'use strict';
+
+    const $ = id => document.getElementById(id);
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    const QUIZ_SECONDS = 20;
+
+    let questionId = 0;
+    let lesson = null; // Snapshot materi yang sudah disimpan.
+    let pdfURL = null; // URL lokal, bukan URL publik.
+    let currentQuestion = 0;
+    let points = 0;
+    let answered = false;
+    let timerId = null;
+    let deadline = 0;
+    let saving = false;
+
+    // 1. Navigasi dashboard.
+    function showDashboard(name) {
+      ['teacher', 'student'].forEach(id => {
+        $(id).hidden = id !== name;
+
+        const button = $(id + '-tab');
+        button.setAttribute('aria-pressed', String(id === name));
+        button.className = 'btn ' + (
+          id === name
+            ? 'bg-violet-700 text-white'
+            : 'text-slate-600'
+        );
+      });
+    }
+
+    $('teacher-tab').onclick = () => showDashboard('teacher');
+    $('student-tab').onclick = () => showDashboard('student');
+
+    // 2. Form soal dinamis.
+    // Template hanya berisi ID dan label internal, bukan input pengguna.
+    function addQuestion() {
+      if ($('questions').children.length >= 50) {
+        $('save-status').textContent =
+          'Maksimal 50 soal untuk satu materi.';
+        return;
+      }
+
+      const id = ++questionId;
+      const group = document.createElement('fieldset');
+      group.className =
+        'rounded-2xl border border-slate-200 bg-slate-50 p-4';
+
+      group.innerHTML = `
+        <legend class="font-bold px-2" data-number></legend>
+
+        <label
+          for="question-${id}"
+          class="block text-sm font-semibold mb-2"
+        >
+          Pertanyaan
+        </label>
+
+        <textarea
+          id="question-${id}"
+          data-question
+          required
+          maxlength="500"
+          rows="2"
+          class="field mb-4"
+          placeholder="Tuliskan pertanyaanmu…"
+        ></textarea>
+
+        <div class="grid sm:grid-cols-2 gap-3">
+          ${['A', 'B', 'C', 'D'].map(letter => `
+            <div>
+              <label
+                for="option-${id}-${letter}"
+                class="block text-sm font-semibold mb-1"
+              >
+                Pilihan ${letter}
+              </label>
+              <input
+                id="option-${id}-${letter}"
+                data-option
+                required
+                maxlength="200"
+                class="field"
+                placeholder="Jawaban ${letter}"
+              >
+            </div>
+          `).join('')}
+        </div>
+
+        <label
+          for="correct-${id}"
+          class="block text-sm font-semibold mt-4 mb-2"
+        >
+          Jawaban benar
+        </label>
+
+        <select
+          id="correct-${id}"
+          data-correct
+          class="field"
+          required
+        >
+          <option value="">Pilih kunci jawaban</option>
+          <option value="0">A</option>
+          <option value="1">B</option>
+          <option value="2">C</option>
+          <option value="3">D</option>
+        </select>
+
+        <button
+          type="button"
+          data-remove
+          class="text-sm font-semibold text-rose-600 mt-4"
+        >
+          Hapus soal
+        </button>
+      `;
+
+      group.querySelector('[data-remove]').onclick = () => {
+        if ($('questions').children.length === 1) {
+          $('save-status').textContent =
+            'Sertakan minimal satu soal.';
+          return;
+        }
+
+        group.remove();
+        renumberQuestions();
+      };
+
+      $('questions').append(group);
+      renumberQuestions();
+      return group;
+    }
+
+    function renumberQuestions() {
+      [...$('questions').children].forEach((group, i) => {
+        group.querySelector('[data-number]').textContent =
+          'Soal ' + (i + 1);
+      });
+    }
+
+    $('add-question').onclick = () => {
+      const group = addQuestion();
+      if (group) group.querySelector('[data-question]').focus();
+    };
+
+    $('pdf-file').onchange = () => {
+      const file = $('pdf-file').files[0];
+
+      $('file-name').textContent = file
+        ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB`
+        : 'Belum ada PDF dipilih.';
+    };
+
+    // 3. Simpan prototipe: log data, lalu pasang materi untuk siswa.
+    $('lesson-form').onsubmit = async event => {
+      event.preventDefault();
+      if (saving) return;
+
+      const file = $('pdf-file').files[0];
+      const title = $('lesson-title').value.trim();
+
+      const questions = [...$('questions').children].map(group => ({
+        question: group.querySelector('[data-question]').value.trim(),
+        options: [...group.querySelectorAll('[data-option]')]
+          .map(input => input.value.trim()),
+        correctAnswer: Number(
+          group.querySelector('[data-correct]').value
+        )
+      }));
+
+      if (
+        !title ||
+        questions.some(q =>
+          !q.question || q.options.some(option => !option)
+        )
+      ) {
+        $('save-status').textContent =
+          'Judul, pertanyaan, dan pilihan tidak boleh hanya berisi spasi.';
+        return;
+      }
+
+      if (
+        !file ||
+        !/\.pdf$/i.test(file.name) ||
+        file.size === 0 ||
+        file.size > MAX_FILE_SIZE
+      ) {
+        $('save-status').textContent =
+          'Pilih PDF yang tidak kosong, maksimal 10 MB.';
+        return;
+      }
+
+      saving = true;
+      $('editor').disabled = true;
+      $('save-status').textContent = 'Memeriksa PDF…';
+
+      try {
+        const header = await file.slice(0, 5).text();
+
+        if (header !== '%PDF-') {
+          throw new Error(
+            'Berkas tidak memiliki header PDF yang valid.'
+          );
+        }
+
+        const nextURL = URL.createObjectURL(file);
+        const previousURL = pdfURL;
+
+        lesson = { title, pdfFile: file, questions };
+        pdfURL = nextURL;
+
+        $('pdf-viewer').src = pdfURL;
+        $('pdf-viewer').hidden = false;
+        $('pdf-placeholder').hidden = true;
+        $('pdf-link').href = pdfURL;
+        $('pdf-link').hidden = false;
+
+        $('lesson-badge').textContent =
+          questions.length + ' soal tersedia';
+
+        $('student-heading').textContent =
+          'Ruang Baca Komik — ' + title;
+
+        $('start-quiz').disabled = false;
+
+        if (previousURL) URL.revokeObjectURL(previousURL);
+
+        console.log('Simpan & Bagikan — data materi:', {
+          title,
+          pdf: {
+            name: file.name,
+            size: file.size,
+            type: file.type || 'application/pdf'
+          },
+          questions
+        });
+
+        console.log(
+          'Objek File untuk integrasi upload berikutnya:',
+          file
+        );
+
+        $('save-status').textContent =
+          'Berhasil! Data dicetak ke console. Buka dashboard Siswa ' +
+          'untuk membaca dan mencoba kuis.';
+      } catch (error) {
+        $('save-status').textContent =
+          error.message || 'PDF gagal diproses. Silakan pilih ulang.';
+      } finally {
+        saving = false;
+        $('editor').disabled = false;
+      }
+    };
+
+    // 4. Timer berbasis batas waktu nyata.
+    // Berpindah tab tidak menambah waktu menjawab.
+    function stopTimer() {
+      if (timerId !== null) clearInterval(timerId);
+      timerId = null;
+    }
+
+    function tickTimer() {
+      if (answered || !$('quiz-dialog').open) return;
+
+      const remaining = Math.max(
+        0,
+        Math.ceil((deadline - Date.now()) / 1000)
+      );
+
+      $('timer').textContent = remaining + ' dtk';
+      $('timer-bar').value = remaining;
+      $('timer').classList.toggle(
+        'text-rose-300',
+        remaining <= 5
+      );
+
+      if (remaining === 0) submitAnswer(null);
+    }
+
+    function startQuiz() {
+      if (!lesson || !lesson.questions.length) return;
+
+      stopTimer();
+      currentQuestion = 0;
+      points = 0;
+
+      $('quiz-result').hidden = true;
+      $('quiz-play').hidden = false;
+      $('quiz-dialog').setAttribute(
+        'aria-labelledby',
+        'quiz-heading'
+      );
+
+      if (!$('quiz-dialog').open) {
+        $('quiz-dialog').showModal();
+      }
+
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      stopTimer();
+      answered = false;
+
+      const question = lesson.questions[currentQuestion];
+
+      $('question-number').textContent =
+        `Soal ${currentQuestion + 1} / ${lesson.questions.length}`;
+
+      $('score').textContent = points + ' poin';
+      $('quiz-heading').textContent = question.question;
+      $('answer-options').replaceChildren();
+      $('feedback').hidden = true;
+      $('next-question').hidden = true;
+
+      const colors = [
+        '#be123c',
+        '#1d4ed8',
+        '#a16207',
+        '#047857'
+      ];
+
+      question.options.forEach((option, i) => {
+        const button = document.createElement('button');
+
+        button.type = 'button';
+        button.className = 'answer';
+        button.style.backgroundColor = colors[i];
+
+        // Input guru selalu ditampilkan sebagai teks.
+        button.textContent =
+          ['▲ A', '◆ B', '● C', '■ D'][i] + '. ' + option;
+
+        button.onclick = () => submitAnswer(i);
+        $('answer-options').append(button);
+      });
+
+      deadline = Date.now() + QUIZ_SECONDS * 1000;
+
+      tickTimer();
+      timerId = setInterval(tickTimer, 100);
+      $('quiz-heading').focus();
+    }
+
+    function submitAnswer(choice) {
+      // Mencegah poin dihitung lebih dari sekali.
+      if (answered) return;
+
+      if (Date.now() >= deadline) choice = null;
+
+      answered = true;
+      stopTimer();
+
+      const question = lesson.questions[currentQuestion];
+      const correct = choice === question.correctAnswer;
+
+      if (correct) points += 100;
+
+      [...$('answer-options').children].forEach((button, i) => {
+        button.disabled = true;
+
+        if (i === question.correctAnswer) {
+          button.classList.add('correct');
+        } else if (i === choice) {
+          button.classList.add('wrong');
+        }
+      });
+
+      const prefix = choice === null
+        ? '⏰ Waktu habis! '
+        : correct
+          ? '🎉 Benar! +100 poin. '
+          : '💪 Belum tepat. ';
+
+      $('feedback').textContent =
+        prefix +
+        'Jawaban benar: ' +
+        'ABCD'[question.correctAnswer] +
+        '. ' +
+        question.options[question.correctAnswer];
+
+      $('feedback').hidden = false;
+      $('score').textContent = points + ' poin';
+
+      $('next-question').textContent =
+        currentQuestion === lesson.questions.length - 1
+          ? 'Lihat hasil 🏆'
+          : 'Soal berikutnya →';
+
+      $('next-question').hidden = false;
+      $('next-question').focus();
+    }
+
+    $('next-question').onclick = () => {
+      if (!answered) return;
+
+      currentQuestion++;
+
+      if (currentQuestion < lesson.questions.length) {
+        renderQuestion();
+      } else {
+        stopTimer();
+
+        $('quiz-play').hidden = true;
+        $('quiz-result').hidden = false;
+        $('quiz-dialog').setAttribute(
+          'aria-labelledby',
+          'result-heading'
+        );
+
+        $('final-score').textContent = points + ' poin';
+        $('result-summary').textContent =
+          `${points / 100} dari ${lesson.questions.length} ` +
+          'jawaban benar. Terus berlatih dan temukan hal baru!';
+
+        $('result-heading').focus();
+      }
+    };
+
+    function closeQuiz() {
+      stopTimer();
+      $('quiz-dialog').close();
+    }
+
+    $('start-quiz').onclick = startQuiz;
+    $('retry-quiz').onclick = startQuiz;
+    $('close-quiz').onclick = closeQuiz;
+    $('back-reading').onclick = closeQuiz;
+
+    $('quiz-dialog').addEventListener('cancel', stopTimer);
+
+    $('quiz-dialog').addEventListener('close', () => {
+      stopTimer();
+      $('start-quiz').focus();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (timerId !== null) tickTimer();
+    });
+
+    window.addEventListener('pagehide', stopTimer);
+
+    window.addEventListener('pageshow', () => {
+      if (
+        $('quiz-dialog').open &&
+        !$('quiz-play').hidden &&
+        !answered
+      ) {
+        stopTimer();
+        tickTimer();
+
+        if (!answered) {
+          timerId = setInterval(tickTimer, 100);
+        }
+      }
+    });
+
+    // Tampilkan satu form soal saat halaman pertama dibuka.
+    addQuestion();
+  </script>
+</body>
+</html>
