@@ -4,43 +4,105 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>KomikQuest — Baca Komik & Main Kuis</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
+
 <style>
-  body{font-family:ui-sans-serif,system-ui,sans-serif;background:#f5f3ff}
-  [hidden]{display:none!important}
-  button{cursor:pointer}
-  button:disabled{opacity:.5;cursor:not-allowed}
-  :focus-visible{outline:3px solid #f59e0b;outline-offset:4px}
-  .field{
-    width:100%;border:1px solid #d4d4e0;border-radius:12px;
-    padding:12px;background:white
+  body {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    background: #f5f3ff;
   }
-  .btn{border-radius:14px;padding:12px 20px;font-weight:700}
-  .answer{
-    min-height:100px;border:3px solid transparent;border-radius:18px;
-    padding:20px;text-align:left;font-weight:700;color:white;
-    overflow-wrap:anywhere
+
+  [hidden] {
+    display: none !important;
   }
-  .answer:disabled{opacity:1}
-  .answer.correct{outline:4px solid #86efac;border-color:white}
-  .answer.wrong{opacity:.5}
-  dialog{
-    width:min(820px,calc(100% - 24px));max-height:92dvh;
-    border:0;border-radius:28px;padding:0
+
+  button {
+    cursor: pointer;
   }
-  dialog::backdrop{background:rgb(26 19 59 / .8)}
-  iframe{
-    width:100%;height:65vh;min-height:360px;
-    border:0;background:#e2e8f0
+
+  button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
   }
-  progress{accent-color:#fbbf24}
+
+  :focus-visible {
+    outline: 3px solid #f59e0b;
+    outline-offset: 4px;
+  }
+
+  .field {
+    width: 100%;
+    border: 1px solid #d4d4e0;
+    border-radius: 12px;
+    padding: 12px;
+    background: white;
+  }
+
+  .btn {
+    border-radius: 14px;
+    padding: 12px 20px;
+    font-weight: 700;
+  }
+
+  .answer {
+    min-height: 100px;
+    border: 3px solid transparent;
+    border-radius: 18px;
+    padding: 20px;
+    text-align: left;
+    font-weight: 700;
+    color: white;
+    overflow-wrap: anywhere;
+  }
+
+  .answer:disabled {
+    opacity: 1;
+  }
+
+  .answer.correct {
+    outline: 4px solid #86efac;
+    border-color: white;
+  }
+
+  .answer.wrong {
+    opacity: .5;
+  }
+
+  dialog {
+    width: min(820px, calc(100% - 24px));
+    max-height: 92dvh;
+    border: 0;
+    border-radius: 28px;
+    padding: 0;
+  }
+
+  dialog::backdrop {
+    background: rgb(26 19 59 / .8);
+  }
+
+  iframe {
+    width: 100%;
+    height: 65vh;
+    min-height: 360px;
+    border: 0;
+    background: #e2e8f0;
+  }
+
+  progress {
+    accent-color: #fbbf24;
+  }
 </style>
 </head>
 
 <body class="text-slate-800">
+
 <header class="bg-white border-b border-violet-100">
   <div class="max-w-6xl mx-auto p-5 flex flex-wrap gap-3 justify-between items-center">
-    <span class="text-2xl font-black text-violet-700">✦ KomikQuest</span>
+    <span class="text-2xl font-black text-violet-700">
+      ✦ KomikQuest
+    </span>
+
     <span class="text-sm text-slate-500">
       Baca cerita. Main kuis. Tambah ilmu!
     </span>
@@ -48,35 +110,47 @@
 </header>
 
 <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+
   <div class="flex flex-wrap gap-5 justify-between items-center mb-6">
     <div>
       <p class="text-xs tracking-widest text-violet-600 font-bold mb-2">
         PETUALANGAN BELAJAR
       </p>
+
       <h1 class="text-3xl font-black">
         Belajar makin seru lewat cerita.
       </h1>
     </div>
 
-    <nav class="flex gap-2 bg-white p-2 rounded-2xl" aria-label="Dashboard">
+    <nav
+      class="flex gap-2 bg-white p-2 rounded-2xl"
+      aria-label="Dashboard"
+    >
       <button
         id="teacher-tab"
         class="btn bg-violet-700 text-white"
         aria-pressed="true"
-        aria-controls="teacher">
+        aria-controls="teacher"
+      >
         🎨 Guru
       </button>
+
       <button
         id="student-tab"
         class="btn text-slate-600"
         aria-pressed="false"
-        aria-controls="student">
+        aria-controls="student"
+      >
         🚀 Siswa
       </button>
     </nav>
   </div>
 
-  <p id="cloud-status" role="status" class="text-sm text-violet-800 mb-5">
+  <p
+    id="cloud-status"
+    role="status"
+    class="text-sm text-violet-800 mb-5"
+  >
     Menghubungkan ke Firebase…
   </p>
 
@@ -86,46 +160,63 @@
 
   <!-- DASHBOARD GURU -->
   <section id="teacher" aria-labelledby="teacher-heading">
+
     <h2 id="teacher-heading" class="text-2xl font-bold mb-5">
       Studio Guru
     </h2>
 
     <div class="bg-white border border-violet-100 rounded-3xl p-6 mb-6">
-      <h3 class="font-bold text-lg mb-3">Masuk sebagai guru</h3>
+      <h3 class="font-bold text-lg mb-3">
+        Masuk sebagai guru
+      </h3>
 
       <p id="auth-status" role="status" class="text-sm mb-4">
         Menyiapkan login…
       </p>
 
-      <form id="login-form" class="grid sm:grid-cols-3 gap-3 items-end">
+      <form
+        id="login-form"
+        class="grid sm:grid-cols-3 gap-3 items-end"
+      >
         <div>
-          <label for="email" class="block text-sm font-bold mb-2">
+          <label
+            for="email"
+            class="block text-sm font-bold mb-2"
+          >
             Email
           </label>
+
           <input
             id="email"
             class="field"
             type="email"
             autocomplete="username"
-            required>
+            required
+          >
         </div>
 
         <div>
-          <label for="password" class="block text-sm font-bold mb-2">
+          <label
+            for="password"
+            class="block text-sm font-bold mb-2"
+          >
             Kata sandi
           </label>
+
           <input
             id="password"
             class="field"
             type="password"
             autocomplete="current-password"
-            required>
+            required
+          >
         </div>
 
         <button
           id="login-button"
           class="btn bg-violet-700 text-white"
-          disabled>
+          disabled
+        >
           Masuk
         </button>
       </form>
@@ -133,36 +224,55 @@
       <button
         id="logout-button"
         class="btn bg-violet-100 text-violet-800"
-        hidden>
+        hidden
+      >
         Keluar
       </button>
 
       <p class="text-xs text-slate-500 mt-3">
-        Akun guru dibuat oleh pengelola melalui Firebase Console.
+        Setiap akun yang berhasil login Firebase Authentication
+        langsung dapat mengakses Dashboard Guru.
       </p>
     </div>
 
     <form id="lesson-form">
-      <fieldset id="editor" class="grid lg:grid-cols-5 gap-6" disabled>
-        <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-violet-100 self-start">
-          <h3 class="font-bold text-xl mb-5">01 · Siapkan komik</h3>
 
-          <label for="lesson-title" class="block font-semibold mb-2">
+      <fieldset
+        id="editor"
+        class="grid lg:grid-cols-5 gap-6"
+        disabled
+      >
+        <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-violet-100 self-start">
+          <h3 class="font-bold text-xl mb-5">
+            01 · Siapkan komik
+          </h3>
+
+          <label
+            for="lesson-title"
+            class="block font-semibold mb-2"
+          >
             Judul materi
           </label>
+
           <input
             id="lesson-title"
             class="field mb-6"
             required
             maxlength="120"
-            placeholder="Petualangan Mengenal Malaikat">
+            placeholder="Petualangan Mengenal Malaikat"
+          >
 
-          <label for="pdf-file" class="block font-semibold mb-2">
+          <label
+            for="pdf-file"
+            class="block font-semibold mb-2"
+          >
             PDF komik pembelajaran
           </label>
 
           <div class="border-2 border-dashed border-violet-200 bg-violet-50 rounded-2xl p-5">
-            <div class="text-4xl mb-3" aria-hidden="true">📚</div>
+            <div class="text-4xl mb-3" aria-hidden="true">
+              📚
+            </div>
 
             <input
               id="pdf-file"
@@ -170,9 +280,13 @@
               type="file"
               accept="application/pdf,.pdf"
               required
-              aria-describedby="pdf-help">
+              aria-describedby="pdf-help"
+            >
 
-            <p id="pdf-help" class="text-xs text-slate-500 mt-3">
+            <p
+              id="pdf-help"
+              class="text-xs text-slate-500 mt-3"
+            >
               Satu PDF, maksimal 10 MB.
             </p>
           </div>
@@ -180,14 +294,18 @@
           <p
             id="file-name"
             role="status"
-            class="text-sm text-violet-700 mt-3 break-words">
+            class="text-sm text-violet-700 mt-3 break-words"
+          >
             Belum ada PDF.
           </p>
         </div>
 
         <div class="lg:col-span-3 bg-white p-6 rounded-3xl border border-violet-100">
           <div class="flex flex-wrap justify-between gap-3 mb-5">
-            <h3 class="font-bold text-xl">02 · Buat tantangan</h3>
+            <h3 class="font-bold text-xl">
+              02 · Buat tantangan
+            </h3>
+
             <span class="text-xs bg-amber-100 rounded-full p-2">
               20 detik / soal
             </span>
@@ -198,14 +316,16 @@
           <button
             id="add-question"
             type="button"
-            class="btn w-full bg-violet-100 text-violet-700 mt-5">
+            class="btn w-full bg-violet-100 text-violet-700 mt-5"
+          >
             + Tambah soal
           </button>
 
           <button
             id="save-button"
             type="submit"
-            class="btn w-full bg-violet-700 text-white mt-4">
+            class="btn w-full bg-violet-700 text-white mt-4"
+          >
             Simpan &amp; Bagikan ✨
           </button>
         </div>
@@ -214,11 +334,12 @@
       <p
         id="save-status"
         role="status"
-        class="font-semibold text-violet-800 my-4 break-words">
-      </p>
+        class="font-semibold text-violet-800 my-4 break-words"
+      ></p>
+
     </form>
 
-    <!-- Aturan ini harus dipasang di Firebase Console. -->
+    <!-- Rules harus dipasang secara terpisah di Firebase Console. -->
     <details class="bg-white rounded-2xl p-5 mt-6">
       <summary class="font-bold cursor-pointer">
         Panduan aktivasi Firebase &amp; Security Rules
@@ -226,31 +347,45 @@
 
       <ol class="list-decimal pl-5 space-y-3 text-sm mt-4">
         <li>
-          Buka proyek <strong>komik-pembelajaran-digital</strong>
-          di Firebase Console. Buat Firestore Database
-          <strong>(default)</strong> dan aktifkan Storage.
+          Buka proyek
+          <strong>komik-pembelajaran-digital</strong>
+          di Firebase Console.
+          Buat Firestore Database <strong>(default)</strong>
+          dan aktifkan Storage.
           Cloud Storage memerlukan paket Blaze.
         </li>
+
         <li>
           Aktifkan Authentication → Sign-in method → Email/Password.
-          Di Users, buat akun guru lalu salin UID-nya.
+          Di Authentication → Users, pastikan akun login
+          beserta kata sandinya sudah dibuat.
         </li>
+
         <li>
-          Di Firestore, buat collection <code>teachers</code>.
-          Buat document dengan ID sama persis dengan UID guru dan field
-          <code>enabled</code> bertipe boolean bernilai <code>true</code>.
+          Dokumen <code>users/wildan@test.com</code>
+          boleh tetap disimpan, tetapi tidak diperiksa untuk login.
+          Membuat dokumen Firestore tidak otomatis membuat
+          akun Authentication.
         </li>
+
         <li>
-          Tempel aturan di bawah ke tab Rules masing-masing layanan,
-          lalu Publish. Saat diminta, izinkan Storage membaca Firestore.
-          Jika proyek memiliki aturan lain, gabungkan aturan dengan hati-hati.
+          Salin Firestore Rules dan Storage Rules terbaru
+          di bawah ke tab Rules masing-masing layanan,
+          lalu Publish.
+          Mengganti index.html tidak memperbarui Rules
+          di server secara otomatis.
+          Jika proyek memiliki aturan lain,
+          gabungkan aturan untuk materials dan comics
+          dengan aturan yang sudah ada.
         </li>
+
         <li>
           Tambahkan domain GitHub Pages Anda
-          (misalnya <code>nama.github.io</code>) pada
-          Authentication → Settings → Authorized domains.
+          (misalnya <code>nama.github.io</code>)
+          pada Authentication → Settings → Authorized domains.
           Untuk pengujian lokal, tambahkan localhost jika diperlukan.
         </li>
+
         <li>
           Login guru, unggah PDF, isi soal dan simpan.
           Siswa membuka situs yang sama, memilih materi,
@@ -265,7 +400,10 @@
         Skor kuis belum disimpan ke database.
       </p>
 
-      <label for="firestore-rules" class="block font-bold mt-5 mb-2">
+      <label
+        for="firestore-rules"
+        class="block font-bold mt-5 mb-2"
+      >
         Firestore Rules
       </label>
 
@@ -274,20 +412,18 @@
         readonly
         rows="12"
         class="field font-mono text-xs"
-        spellcheck="false">rules_version = '2';
+        spellcheck="false"
+      >rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isTeacher() {
-      return request.auth != null &&
-        get(/databases/$(database)/documents/teachers/$(request.auth.uid)).data.enabled == true;
+    function isSignedIn() {
+      return request.auth != null;
     }
-    match /teachers/{uid} {
-      allow get: if request.auth != null && request.auth.uid == uid;
-      allow list, create, update, delete: if false;
-    }
+
     match /materials/{id} {
       allow read: if true;
-      allow create: if isTeacher()
+
+      allow create: if isSignedIn()
         && request.resource.data.keys().hasAll(['title','questions','pdfUrl','pdfPath','ownerUid','createdAt'])
         && request.resource.data.keys().hasOnly(['title','questions','pdfUrl','pdfPath','ownerUid','createdAt'])
         && request.resource.data.ownerUid == request.auth.uid
@@ -300,12 +436,16 @@ service cloud.firestore {
         && request.resource.data.pdfUrl is string
         && request.resource.data.pdfPath == 'comics/' + request.auth.uid + '/' + id + '.pdf'
         && request.resource.data.createdAt == request.time;
+
       allow update, delete: if false;
     }
   }
 }</textarea>
 
-      <label for="storage-rules" class="block font-bold mt-5 mb-2">
+      <label
+        for="storage-rules"
+        class="block font-bold mt-5 mb-2"
+      >
         Storage Rules
       </label>
 
@@ -314,37 +454,48 @@ service cloud.firestore {
         readonly
         rows="12"
         class="field font-mono text-xs"
-        spellcheck="false">rules_version = '2';
+        spellcheck="false"
+      >rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    function isOwnerTeacher(uid) {
-      return request.auth != null && request.auth.uid == uid &&
-        firestore.get(/databases/(default)/documents/teachers/$(request.auth.uid)).data.enabled == true;
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
     }
+
     match /comics/{uid}/{fileName} {
       allow get: if true;
       allow list: if false;
-      allow create: if isOwnerTeacher(uid)
+
+      allow create: if isOwner(uid)
         && request.resource.size > 0
         && request.resource.size <= 10 * 1024 * 1024
         && request.resource.contentType == 'application/pdf';
-      allow delete: if isOwnerTeacher(uid);
+
+      allow delete: if isOwner(uid);
       allow update: if false;
     }
   }
 }</textarea>
 
       <p class="text-xs text-slate-500 mt-3">
-        Jangan menggunakan aturan allow write: if true.
-        Pengelolaan peran guru dilakukan melalui Console,
-        bukan dari aplikasi.
+        Mode akses longgar: semua akun yang berhasil login
+        dapat membuat materi.
+        Pengunjung tanpa login hanya dapat membaca.
+        Rules ini tidak membutuhkan koleksi users atau teachers.
       </p>
     </details>
   </section>
 
   <!-- DASHBOARD SISWA -->
-  <section id="student" hidden aria-labelledby="student-heading">
-    <h2 id="student-heading" class="text-2xl font-black mb-3">
+  <section
+    id="student"
+    hidden
+    aria-labelledby="student-heading"
+  >
+    <h2
+      id="student-heading"
+      class="text-2xl font-black mb-3"
+    >
       Pilih petualangan belajarmu 🚀
     </h2>
 
@@ -354,21 +505,29 @@ service firebase.storage {
 
     <div
       id="material-list"
-      class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-    </div>
+      class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"
+    ></div>
 
     <article class="bg-white rounded-3xl border border-violet-100 p-4 sm:p-6">
       <h3
         id="reading-title"
-        class="text-xl font-bold mb-4 break-words">
+        class="text-xl font-bold mb-4 break-words"
+      >
         Ruang Baca Komik
       </h3>
 
       <div
         id="pdf-placeholder"
-        class="min-h-80 bg-gradient-to-br from-violet-100 to-sky-100 rounded-2xl flex flex-col items-center justify-center text-center p-8">
-        <div class="text-7xl mb-5" aria-hidden="true">📖</div>
-        <p class="text-xl font-bold">Cerita seru menantimu!</p>
+        class="min-h-80 bg-gradient-to-br from-violet-100 to-sky-100 rounded-2xl flex flex-col items-center justify-center text-center p-8"
+      >
+        <div class="text-7xl mb-5" aria-hidden="true">
+          📖
+        </div>
+
+        <p class="text-xl font-bold">
+          Cerita seru menantimu!
+        </p>
+
         <p class="text-slate-600 mt-3">
           Pilih materi di atas untuk membaca komik dan memulai kuis.
         </p>
@@ -377,15 +536,16 @@ service firebase.storage {
       <iframe
         id="pdf-viewer"
         title="PDF komik pembelajaran"
-        hidden>
-      </iframe>
+        hidden
+      ></iframe>
 
       <a
         id="pdf-link"
         target="_blank"
         rel="noopener"
         class="inline-block mt-3 text-sm text-violet-700 underline"
-        hidden>
+        hidden
+      >
         Buka PDF di tab baru jika pembaca tidak tampil
       </a>
 
@@ -393,9 +553,11 @@ service firebase.storage {
         <button
           id="start-quiz"
           class="btn bg-violet-700 text-white text-lg"
-          disabled>
+          disabled
+        >
           ⚡ Mulai Kuis Instan
         </button>
+
         <p class="text-xs text-slate-500 mt-3">
           20 detik per soal · 100 poin untuk jawaban benar
         </p>
@@ -411,29 +573,38 @@ service firebase.storage {
 <!-- MODAL KUIS -->
 <dialog id="quiz-dialog" aria-labelledby="quiz-heading">
   <div class="bg-violet-950 text-white p-5 sm:p-8">
+
     <div class="flex justify-between items-center gap-3 mb-6">
       <span class="font-bold text-violet-200">
         ✦ TANTANGAN KOMIKQUEST
       </span>
+
       <button
         id="close-quiz"
         class="btn bg-white/10"
-        aria-label="Tutup kuis">
+        aria-label="Tutup kuis"
+      >
         ✕
       </button>
     </div>
 
     <div id="quiz-play">
+
       <div class="flex justify-between gap-3 items-center mb-3">
         <span id="question-number"></span>
+
         <span
           id="timer"
           role="timer"
           aria-label="Sisa waktu"
-          class="text-2xl font-black">
+          class="text-2xl font-black"
+        >
           20 dtk
         </span>
-        <span id="score" class="font-bold">0 poin</span>
+
+        <span id="score" class="font-bold">
+          0 poin
+        </span>
       </div>
 
       <progress
@@ -441,57 +612,71 @@ service firebase.storage {
         value="20"
         max="20"
         class="w-full mb-6"
-        aria-label="Sisa waktu menjawab">
-      </progress>
+        aria-label="Sisa waktu menjawab"
+      ></progress>
 
       <h2
         id="quiz-heading"
         tabindex="-1"
-        class="text-2xl font-black mb-6 break-words">
-      </h2>
+        class="text-2xl font-black mb-6 break-words"
+      ></h2>
 
-      <div id="answer-options" class="grid sm:grid-cols-2 gap-4"></div>
+      <div
+        id="answer-options"
+        class="grid sm:grid-cols-2 gap-4"
+      ></div>
 
       <p
         id="feedback"
         role="status"
         class="bg-white/10 rounded-2xl p-4 mt-5"
-        hidden>
-      </p>
+        hidden
+      ></p>
 
       <button
         id="next-question"
         class="btn w-full bg-white text-violet-900 mt-4"
-        hidden>
+        hidden
+      >
         Soal berikutnya →
       </button>
     </div>
 
-    <div id="quiz-result" class="text-center py-6" hidden>
-      <div class="text-6xl mb-5" aria-hidden="true">🏆</div>
+    <div
+      id="quiz-result"
+      class="text-center py-6"
+      hidden
+    >
+      <div class="text-6xl mb-5" aria-hidden="true">
+        🏆
+      </div>
 
       <h2
         id="result-heading"
         tabindex="-1"
-        class="text-3xl font-black">
+        class="text-3xl font-black"
+      >
         Misi selesai!
       </h2>
 
       <p
         id="final-score"
-        class="text-5xl text-amber-300 font-black my-6">
-      </p>
+        class="text-5xl text-amber-300 font-black my-6"
+      ></p>
 
       <p id="result-summary" class="mb-6"></p>
 
       <button
         id="retry-quiz"
-        class="btn bg-amber-300 text-violet-950">
+        class="btn bg-amber-300 text-violet-950"
+      >
         Coba lagi
       </button>
+
       <button
         id="back-reading"
-        class="btn bg-white/10 mt-3">
+        class="btn bg-white/10 mt-3"
+      >
         Kembali membaca
       </button>
     </div>
@@ -501,8 +686,7 @@ service firebase.storage {
 <script>
 'use strict';
 
-// Konfigurasi Web App Firebase.
-// Jangan memasukkan service-account private key ke HTML.
+// Konfigurasi Firebase tetap menggunakan konfigurasi Anda.
 const firebaseConfig = {
   apiKey: "AIzaSyBUUFCCgKMD3YsxNXUOSwKqRM9MZjgBns4",
   authDomain: "komik-pembelajaran-digital.firebaseapp.com",
@@ -521,13 +705,12 @@ let cloud = null;
 let teacher = null;
 let saving = false;
 let loggingIn = false;
-let roleUnsubscribe = null;
-let authEpoch = 0;
 let questionId = 0;
 
 let materials = [];
 let selected = null;
 let quizLesson = null;
+
 let currentQuestion = 0;
 let points = 0;
 let answered = false;
@@ -538,22 +721,31 @@ function message(error) {
   const known = {
     'auth/invalid-credential':
       'Email atau kata sandi tidak sesuai.',
+
     'auth/too-many-requests':
       'Terlalu banyak percobaan login. Tunggu lalu coba lagi.',
+
     'auth/operation-not-allowed':
       'Aktifkan Email/Password di Firebase Authentication.',
+
     'auth/unauthorized-domain':
       'Tambahkan domain situs pada Authorized domains.',
+
     'auth/network-request-failed':
       'Koneksi bermasalah. Periksa internet.',
+
     'permission-denied':
-      'Firestore menolak akses. Periksa Rules dan teachers/{UID}.enabled.',
+      'Firestore menolak akses. Login ulang dan Publish Firestore Rules terbaru pada panduan di bawah.',
+
     'storage/unauthorized':
-      'Storage menolak akses. Periksa Rules, izin guru dan billing Blaze.',
+      'Storage menolak akses. Publish Storage Rules terbaru, pastikan sudah login dan billing Blaze aktif.',
+
     'storage/quota-exceeded':
       'Kuota Storage habis. Periksa kuota dan billing.',
+
     'storage/bucket-not-found':
       'Bucket Storage belum tersedia. Aktifkan Storage di Console.',
+
     'storage/retry-limit-exceeded':
       'Unggahan terhenti. Periksa internet dan coba lagi.'
   };
@@ -592,7 +784,35 @@ function updateAuthUI() {
   $('logout-button').disabled = saving;
 }
 
-// 1. Inisialisasi Firebase Auth, Firestore dan Storage.
+/*
+ * PERBAIKAN UTAMA:
+ *
+ * Setiap pengguna yang berhasil login Firebase Authentication
+ * langsung dianggap memiliki akses Dashboard Guru.
+ *
+ * Tidak membaca:
+ * - users/{email}
+ * - teachers/{UID}
+ * - field role
+ * - field enabled
+ */
+function applyAuthenticatedUser(user) {
+  teacher = user || null;
+
+  $('auth-status').textContent = user
+    ? 'Login berhasil sebagai ' +
+      (user.email || user.uid) +
+      '. Dashboard Guru siap digunakan.'
+    : 'Silakan masuk menggunakan akun Firebase Authentication.';
+
+  updateAuthUI();
+
+  if (user) {
+    showDashboard('teacher');
+  }
+}
+
+// 1. Firebase Authentication, Firestore dan Storage.
 async function initFirebase() {
   try {
     const [appSDK, a, f, s] = await Promise.all(
@@ -604,7 +824,10 @@ async function initFirebase() {
     const app = appSDK.initializeApp(firebaseConfig);
     const auth = a.getAuth(app);
 
-    await a.setPersistence(auth, a.browserSessionPersistence);
+    await a.setPersistence(
+      auth,
+      a.browserSessionPersistence
+    );
 
     cloud = {
       a,
@@ -615,56 +838,25 @@ async function initFirebase() {
       storage: s.getStorage(app)
     };
 
-    a.onAuthStateChanged(auth, user => {
-      const epoch = ++authEpoch;
-      teacher = null;
+    /*
+     * Berlaku untuk:
+     * - login baru
+     * - sesi login yang dipulihkan setelah refresh
+     * - logout
+     *
+     * Tidak melakukan pemeriksaan role di Firestore.
+     */
+    a.onAuthStateChanged(
+      auth,
+      applyAuthenticatedUser
+    );
 
-      if (roleUnsubscribe) roleUnsubscribe();
-      roleUnsubscribe = null;
-
-      updateAuthUI();
-
-      if (!user) {
-        $('auth-status').textContent =
-          'Masuk menggunakan akun guru yang dibuat pengelola.';
-        return;
-      }
-
-      $('auth-status').textContent = 'Memeriksa izin guru…';
-
-      roleUnsubscribe = f.onSnapshot(
-        f.doc(cloud.db, 'teachers', user.uid),
-        snapshot => {
-          if (epoch !== authEpoch) return;
-
-          teacher =
-            snapshot.exists() &&
-            snapshot.data().enabled === true
-              ? user
-              : null;
-
-          $('auth-status').textContent = teacher
-            ? 'Terhubung sebagai ' + user.email
-            : 'Akun belum diberi izin guru. Ikuti panduan aktivasi di bawah.';
-
-          updateAuthUI();
-        },
-        error => {
-          if (epoch !== authEpoch) return;
-
-          teacher = null;
-          $('auth-status').textContent = message(error);
-          updateAuthUI();
-        }
-      );
-    });
-
+    // Listener ini hanya membaca materi untuk dashboard siswa.
     const query = f.query(
       f.collection(cloud.db, 'materials'),
       f.orderBy('createdAt', 'desc')
     );
 
-    // Listener realtime untuk dashboard siswa.
     f.onSnapshot(
       query,
       { includeMetadataChanges: true },
@@ -701,6 +893,10 @@ async function initFirebase() {
         }
       },
       error => {
+        /*
+         * Gagal membaca materi tidak mencabut akses
+         * Dashboard Guru jika Authentication sudah berhasil.
+         */
         $('cloud-status').textContent = message(error);
         $('reload').hidden = false;
       }
@@ -718,6 +914,7 @@ async function initFirebase() {
   updateAuthUI();
 }
 
+// 2. Login: langsung buka Dashboard Guru setelah berhasil.
 $('login-form').onsubmit = async event => {
   event.preventDefault();
 
@@ -725,14 +922,23 @@ $('login-form').onsubmit = async event => {
 
   loggingIn = true;
   updateAuthUI();
+
   $('auth-status').textContent = 'Sedang masuk…';
 
   try {
-    await cloud.a.signInWithEmailAndPassword(
-      cloud.auth,
-      $('email').value.trim(),
-      $('password').value
-    );
+    const credential =
+      await cloud.a.signInWithEmailAndPassword(
+        cloud.auth,
+        $('email').value.trim(),
+        $('password').value
+      );
+
+    /*
+     * Login Authentication berhasil.
+     * Langsung aktifkan Dashboard Guru.
+     * Tidak memanggil getDoc/onSnapshot untuk dokumen role.
+     */
+    applyAuthenticatedUser(credential.user);
   } catch (error) {
     $('auth-status').textContent = message(error);
   } finally {
@@ -747,16 +953,17 @@ $('logout-button').onclick = async () => {
 
   try {
     await cloud.a.signOut(cloud.auth);
+    // onAuthStateChanged otomatis menonaktifkan editor.
   } catch (error) {
     $('auth-status').textContent = message(error);
   }
 };
 
-// 2. Form soal dinamis.
-// Template hanya berisi ID dan label internal.
+// 3. Form soal dinamis.
 function addQuestion() {
   if ($('questions').children.length >= 50) {
-    $('save-status').textContent = 'Maksimal 50 soal per materi.';
+    $('save-status').textContent =
+      'Maksimal 50 soal per materi.';
     return;
   }
 
@@ -766,8 +973,12 @@ function addQuestion() {
   group.className =
     'rounded-2xl border border-slate-200 bg-slate-50 p-4';
 
+  // Template hanya berisi ID dan label internal.
   group.innerHTML = `
-    <legend data-number class="font-bold px-2"></legend>
+    <legend
+      data-number
+      class="font-bold px-2">
+    </legend>
 
     <label
       for="q-${id}"
@@ -831,7 +1042,8 @@ function addQuestion() {
 
   group.querySelector('[data-remove]').onclick = () => {
     if ($('questions').children.length === 1) {
-      $('save-status').textContent = 'Minimal satu soal diperlukan.';
+      $('save-status').textContent =
+        'Minimal satu soal diperlukan.';
       return;
     }
 
@@ -863,8 +1075,7 @@ $('pdf-file').onchange = () => {
     : 'Belum ada PDF.';
 };
 
-// 3. Upload PDF, kemudian simpan dokumen Firestore.
-// Fungsi ini benar-benar melakukan penulisan, bukan console.log.
+// 4. Upload PDF dan simpan metadata/kuis ke Firestore.
 async function saveLesson(title, questions, file) {
   if (!cloud || !teacher) {
     throw new Error('Silakan login sebagai guru.');
@@ -873,8 +1084,11 @@ async function saveLesson(title, questions, file) {
   const { f, s, db, storage } = cloud;
   const uid = teacher.uid;
 
-  // Membuat ID dokumen terlebih dahulu.
-  const record = f.doc(f.collection(db, 'materials'));
+  // Buat ID dokumen sebelum mengunggah PDF.
+  const record = f.doc(
+    f.collection(db, 'materials')
+  );
+
   const pdfPath = `comics/${uid}/${record.id}.pdf`;
   const reference = s.ref(storage, pdfPath);
 
@@ -917,7 +1131,6 @@ async function saveLesson(title, questions, file) {
 
     committing = true;
 
-    // PENULISAN DATA KE FIRESTORE.
     await f.setDoc(record, {
       title,
       questions,
@@ -929,8 +1142,13 @@ async function saveLesson(title, questions, file) {
 
     return record.id;
   } catch (error) {
-    // Storage dan Firestore tidak memiliki transaksi lintas layanan.
-    // Hapus unggahan hanya jika dokumen pasti belum tersimpan.
+    /*
+     * Storage dan Firestore tidak memiliki transaksi
+     * lintas layanan.
+     *
+     * Hapus unggahan hanya jika dokumen pasti
+     * belum tersimpan.
+     */
     let extra = '';
 
     const rejected = [
@@ -943,7 +1161,9 @@ async function saveLesson(title, questions, file) {
       try {
         await s.deleteObject(reference);
       } catch {
-        extra = ' Hapus unggahan sisa di Storage: ' + pdfPath;
+        extra =
+          ' Hapus unggahan sisa di Storage: ' +
+          pdfPath;
       }
     } else if (committing) {
       extra =
@@ -971,14 +1191,15 @@ $('lesson-form').onsubmit = async event => {
   const file = $('pdf-file').files[0];
 
   const questions = [...$('questions').children].map(group => ({
-    question: group.querySelector('[data-question]').value.trim(),
+    question:
+      group.querySelector('[data-question]').value.trim(),
 
-    options: [...group.querySelectorAll('[data-option]')]
-      .map(input => input.value.trim()),
+    options:
+      [...group.querySelectorAll('[data-option]')]
+        .map(input => input.value.trim()),
 
-    correctAnswer: Number(
-      group.querySelector('[data-correct]').value
-    )
+    correctAnswer:
+      Number(group.querySelector('[data-correct]').value)
   }));
 
   if (
@@ -997,26 +1218,35 @@ $('lesson-form').onsubmit = async event => {
     file.size === 0 ||
     file.size > MAX_PDF_BYTES
   ) {
-    $('save-status').textContent = 'Pilih PDF maksimal 10 MB.';
+    $('save-status').textContent =
+      'Pilih PDF maksimal 10 MB.';
     return;
   }
 
   saving = true;
   updateAuthUI();
+
   $('save-status').textContent = 'Memeriksa PDF…';
 
   try {
-    if (await file.slice(0, 5).text() !== '%PDF-') {
+    const header = await file.slice(0, 5).text();
+
+    if (header !== '%PDF-') {
       throw new Error(
         'Berkas tidak memiliki header PDF yang valid.'
       );
     }
 
-    const id = await saveLesson(title, questions, file);
+    const id = await saveLesson(
+      title,
+      questions,
+      file
+    );
 
     event.target.reset();
     $('questions').replaceChildren();
     addQuestion();
+
     $('file-name').textContent = 'Belum ada PDF.';
 
     $('save-status').textContent =
@@ -1031,8 +1261,7 @@ $('lesson-form').onsubmit = async event => {
   }
 };
 
-// 4. Katalog siswa.
-// Teks dari database tidak dimasukkan ke innerHTML.
+// 5. Validasi dan katalog siswa.
 function validQuestions(items) {
   return (
     Array.isArray(items) &&
@@ -1074,7 +1303,9 @@ function validMaterial(material) {
       url.protocol === 'https:' &&
       url.hostname === 'firebasestorage.googleapis.com' &&
       url.pathname.startsWith(
-        '/v0/b/' + firebaseConfig.storageBucket + '/o/'
+        '/v0/b/' +
+        firebaseConfig.storageBucket +
+        '/o/'
       )
     );
   } catch {
@@ -1129,7 +1360,8 @@ function renderMaterials() {
     card.append(
       element(
         'p',
-        material.questions.length + ' soal · 20 detik per soal',
+        material.questions.length +
+        ' soal · 20 detik per soal',
         'text-sm text-slate-500 mb-4'
       )
     );
@@ -1159,6 +1391,7 @@ function selectMaterial(material) {
 
   $('pdf-link').href = material.pdfUrl;
   $('pdf-link').hidden = false;
+
   $('start-quiz').disabled = false;
 }
 
@@ -1169,13 +1402,17 @@ function clearReading() {
   $('pdf-viewer').hidden = true;
   $('pdf-placeholder').hidden = false;
   $('pdf-link').hidden = true;
+
   $('start-quiz').disabled = true;
   $('reading-title').textContent = 'Ruang Baca Komik';
 }
 
-// 5. Kuis dengan timer 20 detik per soal.
+// 6. Kuis dengan timer 20 detik per soal.
 function stopTimer() {
-  if (timerId !== null) clearInterval(timerId);
+  if (timerId !== null) {
+    clearInterval(timerId);
+  }
+
   timerId = null;
 }
 
@@ -1195,7 +1432,9 @@ function tickTimer() {
     remaining <= 5
   );
 
-  if (remaining === 0) submitAnswer(null);
+  if (remaining === 0) {
+    submitAnswer(null);
+  }
 }
 
 function startQuiz() {
@@ -1203,7 +1442,6 @@ function startQuiz() {
 
   stopTimer();
 
-  // Snapshot materi untuk sesi kuis ini.
   quizLesson = selected;
   currentQuestion = 0;
   points = 0;
@@ -1227,7 +1465,8 @@ function renderQuestion() {
   stopTimer();
   answered = false;
 
-  const question = quizLesson.questions[currentQuestion];
+  const question =
+    quizLesson.questions[currentQuestion];
 
   $('question-number').textContent =
     `Soal ${currentQuestion + 1} / ${quizLesson.questions.length}`;
@@ -1249,7 +1488,9 @@ function renderQuestion() {
   question.options.forEach((option, i) => {
     const button = element(
       'button',
-      ['▲ A', '◆ B', '● C', '■ D'][i] + '. ' + option,
+      ['▲ A', '◆ B', '● C', '■ D'][i] +
+      '. ' +
+      option,
       'answer'
     );
 
@@ -1263,22 +1504,29 @@ function renderQuestion() {
 
   tickTimer();
   timerId = setInterval(tickTimer, 100);
+
   $('quiz-heading').focus();
 }
 
 function submitAnswer(choice) {
   if (answered) return;
 
-  // Klik terlambat tetap dihitung sebagai kehabisan waktu.
-  if (Date.now() >= deadline) choice = null;
+  if (Date.now() >= deadline) {
+    choice = null;
+  }
 
   answered = true;
   stopTimer();
 
-  const question = quizLesson.questions[currentQuestion];
-  const correct = choice === question.correctAnswer;
+  const question =
+    quizLesson.questions[currentQuestion];
 
-  if (correct) points += 100;
+  const correct =
+    choice === question.correctAnswer;
+
+  if (correct) {
+    points += 100;
+  }
 
   [...$('answer-options').children].forEach((button, i) => {
     button.disabled = true;
@@ -1333,7 +1581,8 @@ $('next-question').onclick = () => {
       'result-heading'
     );
 
-    $('final-score').textContent = points + ' poin';
+    $('final-score').textContent =
+      points + ' poin';
 
     $('result-summary').textContent =
       `${points / 100} dari ${quizLesson.questions.length} ` +
@@ -1353,15 +1602,23 @@ $('retry-quiz').onclick = startQuiz;
 $('close-quiz').onclick = closeQuiz;
 $('back-reading').onclick = closeQuiz;
 
-$('quiz-dialog').addEventListener('cancel', stopTimer);
+$('quiz-dialog').addEventListener(
+  'cancel',
+  stopTimer
+);
 
 $('quiz-dialog').addEventListener('close', () => {
   stopTimer();
-  if (selected) $('start-quiz').focus();
+
+  if (selected) {
+    $('start-quiz').focus();
+  }
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (timerId !== null) tickTimer();
+  if (timerId !== null) {
+    tickTimer();
+  }
 });
 
 window.addEventListener('pagehide', stopTimer);
@@ -1381,9 +1638,10 @@ window.addEventListener('pageshow', () => {
   }
 });
 
-// Mulai aplikasi.
+// Jalankan aplikasi.
 addQuestion();
 initFirebase();
 </script>
+
 </body>
 </html>
