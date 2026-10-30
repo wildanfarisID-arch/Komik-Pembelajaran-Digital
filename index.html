@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KomikQuest — Baca Komik & Main Kuis</title>
+<title>KomikQuest — Platform Evaluasi Digital</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   body{font-family:ui-sans-serif,system-ui,sans-serif;background:#f5f3ff}
@@ -11,7 +11,8 @@
   button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}
   :focus-visible{outline:3px solid #f59e0b;outline-offset:4px}
   .field{width:100%;border:1px solid #d4d4e0;border-radius:12px;padding:12px;background:white}
-  .btn{border-radius:14px;padding:12px 20px;font-weight:700}
+  .btn{border-radius:14px;padding:12px 20px;font-weight:700; transition: all 0.2s;}
+  .btn:active{transform: scale(0.97);}
   .answer{min-height:100px;border:3px solid transparent;border-radius:18px;padding:20px;text-align:left;font-weight:700;color:white;overflow-wrap:anywhere}
   .answer:disabled{opacity:1}.answer.correct{outline:4px solid #86efac;border-color:white}.answer.wrong{opacity:.5}
   dialog{width:min(820px,calc(100% - 24px));max-height:92dvh;border:0;border-radius:28px;padding:0}
@@ -24,26 +25,28 @@
 <header class="bg-white border-b border-violet-100">
   <div class="max-w-6xl mx-auto p-5 flex flex-wrap gap-3 justify-between items-center">
     <span class="text-2xl font-black text-violet-700">✦ KomikQuest</span>
-    <span class="text-sm text-slate-500">Baca cerita. Main kuis. Tambah ilmu!</span>
+    <span class="text-sm text-slate-500">Platform Evaluasi Interaktif</span>
   </div>
 </header>
 <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
   <div class="flex flex-wrap gap-5 justify-between items-center mb-6">
-    <div><p class="text-xs tracking-widest text-violet-600 font-bold mb-2">PETUALANGAN BELAJAR</p>
-      <h1 class="text-3xl font-black">Belajar makin seru lewat cerita.</h1></div>
+    <div><p class="text-xs tracking-widest text-violet-600 font-bold mb-2">PORTAL PEMBELAJARAN</p>
+      <h1 class="text-3xl font-black">Evaluasi seru lewat cerita.</h1></div>
     <nav class="flex gap-2 bg-white p-2 rounded-2xl" aria-label="Dashboard">
-      <button id="teacher-tab" class="btn bg-violet-700 text-white" aria-pressed="true" aria-controls="teacher">🎨 Guru</button>
-      <button id="student-tab" class="btn text-slate-600" aria-pressed="false" aria-controls="student">🚀 Siswa</button>
+      <button id="teacher-tab" class="btn bg-violet-700 text-white" aria-pressed="true" aria-controls="teacher">🎨 Dasbor Guru</button>
+      <button id="student-tab" class="btn text-slate-600" aria-pressed="false" aria-controls="student">🚀 Ruang Siswa</button>
     </nav>
   </div>
   <p id="cloud-status" role="status" class="text-sm text-violet-800 mb-5">Menghubungkan ke Firebase…</p>
-  <button id="reload" class="btn bg-white mb-5" hidden>Muat ulang koneksi</button>
+  <button id="reload" class="btn bg-white mb-5 border border-slate-200" hidden>Muat ulang koneksi</button>
 
   <!-- DASHBOARD GURU -->
   <section id="teacher" aria-labelledby="teacher-heading">
-    <h2 id="teacher-heading" class="text-2xl font-bold mb-5">Studio Guru</h2>
     <div class="bg-white border border-violet-100 rounded-3xl p-6 mb-6">
-      <h3 class="font-bold text-lg mb-3">Masuk sebagai guru</h3>
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-bold text-lg">Akses Guru</h3>
+        <button id="logout-button" class="btn bg-violet-100 text-violet-800 py-2 text-sm" hidden>Keluar</button>
+      </div>
       <p id="auth-status" role="status" class="text-sm mb-4">Menyiapkan login…</p>
       <form id="login-form" class="grid sm:grid-cols-3 gap-3 items-end">
         <div><label for="email" class="block text-sm font-bold mb-2">Email</label>
@@ -54,121 +57,123 @@
           <button id="login-button" type="submit" class="btn bg-violet-700 text-white" disabled>Masuk</button>
           <button id="register-button" type="button" class="btn bg-violet-100 text-violet-800" disabled>Daftar akun</button>
         </div>
-        <p class="sm:col-span-3 text-xs text-slate-500">Belum punya akun? Isi email dan kata sandi, lalu pilih Daftar akun. Setelah berhasil, Anda langsung masuk.</p>
       </form>
-      <button id="logout-button" class="btn bg-violet-100 text-violet-800" hidden>Keluar</button>
-      <p class="text-xs text-slate-500 mt-3">Setiap akun yang berhasil login Firebase Authentication langsung dapat mengakses Dashboard Guru.</p>
     </div>
 
-    <form id="lesson-form">
-      <fieldset id="editor" class="grid lg:grid-cols-5 gap-6" disabled>
-        <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-violet-100 self-start">
-          <h3 class="font-bold text-xl mb-5">01 · Siapkan komik</h3>
-          <label for="lesson-title" class="block font-semibold mb-2">Judul materi</label>
-          <input id="lesson-title" class="field mb-6" required maxlength="120" placeholder="Petualangan Mengenal Malaikat">
-          <label for="pdf-file" class="block font-semibold mb-2">PDF komik pembelajaran</label>
-          <div class="border-2 border-dashed border-violet-200 bg-violet-50 rounded-2xl p-5">
-            <div class="text-4xl mb-3" aria-hidden="true">📚</div>
-            <input id="pdf-file" class="w-full text-sm" type="file" accept="application/pdf,.pdf" required aria-describedby="pdf-help">
-            <p id="pdf-help" class="text-xs text-slate-500 mt-3">Satu PDF, maksimal 10 MB.</p>
-          </div>
-          <p id="file-name" role="status" class="text-sm text-violet-700 mt-3 break-words">Belum ada PDF.</p>
+    <div id="teacher-workspace" hidden>
+      <!-- Kelas Aktif Guru -->
+      <div class="mb-8">
+        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">🟢 Kelas Aktif Saya <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">Berjalan</span></h3>
+        <div id="active-sessions-list" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <p class="text-slate-500 text-sm">Belum ada kelas yang sedang berjalan.</p>
         </div>
-        <div class="lg:col-span-3 bg-white p-6 rounded-3xl border border-violet-100">
-          <div class="flex flex-wrap justify-between gap-3 mb-5">
-            <h3 class="font-bold text-xl">02 · Buat tantangan</h3>
-            <span class="text-xs bg-amber-100 rounded-full p-2">20 detik / soal</span>
-          </div>
-          <div id="questions" class="space-y-5"></div>
-          <button id="add-question" type="button" class="btn w-full bg-violet-100 text-violet-700 mt-5">+ Tambah soal</button>
-          <button id="save-button" type="submit" class="btn w-full bg-violet-700 text-white mt-4">Simpan &amp; Bagikan ✨</button>
-        </div>
-      </fieldset>
-      <p id="save-status" role="status" class="font-semibold text-violet-800 my-4 break-words"></p>
-    </form>
+      </div>
 
-    <!-- Petunjuk pengelola; aturan ini harus dipasang di Firebase Console. -->
-    <details class="bg-white rounded-2xl p-5 mt-6">
-      <summary class="font-bold cursor-pointer">Panduan aktivasi Firebase &amp; Security Rules</summary>
-      <ol class="list-decimal pl-5 space-y-3 text-sm mt-4">
-        <li>Buka proyek <strong>komik-pembelajaran-digital</strong> di Firebase Console. Buat Firestore Database <strong>(default)</strong> dan aktifkan Storage. Cloud Storage memerlukan paket Blaze.</li>
-        <li>Aktifkan Authentication → Sign-in method → Email/Password. Pengguna dapat membuat akun melalui tombol Daftar akun di website. Akun yang berhasil dibuat akan muncul di Authentication → Users.</li>
-        <li>Dokumen <code>users/wildan@test.com</code> boleh tetap disimpan, tetapi tidak diperiksa untuk login. Membuat dokumen Firestore tidak otomatis membuat akun Authentication.</li>
-        <li>Salin Firestore Rules dan Storage Rules terbaru di bawah ke tab Rules masing-masing layanan, lalu Publish. Mengganti index.html tidak memperbarui Rules di server secara otomatis. Jika proyek memiliki aturan lain, gabungkan aturan untuk materials dan comics dengan aturan yang sudah ada.</li>
-        <li>Tambahkan domain GitHub Pages Anda (misalnya <code>nama.github.io</code>) pada Authentication → Settings → Authorized domains. Untuk pengujian lokal, tambahkan localhost jika diperlukan.</li>
-        <li>Login guru, unggah PDF, isi soal dan simpan. Siswa membuka situs yang sama, memilih materi, membaca PDF, lalu memulai kuis.</li>
-      </ol>
-      <p class="text-sm mt-4">Materi dan soal dapat dibaca publik. Kunci jawaban dikirim ke browser untuk latihan, bukan untuk ujian dengan kunci rahasia. Skor kuis belum disimpan ke database.</p>
-      <label for="firestore-rules" class="block font-bold mt-5 mb-2">Firestore Rules</label>
-      <textarea id="firestore-rules" readonly rows="12" class="field font-mono text-xs" spellcheck="false">rules_version = '2';
+      <!-- Bank Soal Publik -->
+      <div class="mb-8">
+        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">📚 Bank Soal Publik <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">Bisa dipakai siapa saja</span></h3>
+        <div id="material-list" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
+
+      <!-- Form Buat Materi Baru -->
+      <form id="lesson-form" class="mt-10 border-t border-violet-200 pt-8">
+        <h3 class="font-bold text-2xl mb-5">➕ Buat Materi Baru ke Bank Soal</h3>
+        <fieldset id="editor" class="grid lg:grid-cols-5 gap-6" disabled>
+          <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-violet-100 self-start">
+            <h4 class="font-bold text-lg mb-4">01 · Siapkan komik</h4>
+            <label for="lesson-title" class="block font-semibold mb-2 text-sm">Judul materi</label>
+            <input id="lesson-title" class="field mb-6" required maxlength="120" placeholder="Petualangan Mengenal Malaikat">
+            <label for="pdf-file" class="block font-semibold mb-2 text-sm">PDF komik pembelajaran</label>
+            <div class="border-2 border-dashed border-violet-200 bg-violet-50 rounded-2xl p-5 text-center">
+              <div class="text-4xl mb-3" aria-hidden="true">📑</div>
+              <input id="pdf-file" class="w-full text-sm" type="file" accept="application/pdf,.pdf" required>
+              <p class="text-xs text-slate-500 mt-3">Maksimal 10 MB.</p>
+            </div>
+            <p id="file-name" role="status" class="text-sm text-violet-700 mt-3 break-words">Belum ada PDF.</p>
+          </div>
+          <div class="lg:col-span-3 bg-white p-6 rounded-3xl border border-violet-100">
+            <div class="flex flex-wrap justify-between gap-3 mb-5">
+              <h4 class="font-bold text-lg">02 · Buat soal tantangan</h4>
+              <span class="text-xs bg-amber-100 rounded-full px-3 py-1 font-bold">20 detik / soal</span>
+            </div>
+            <div id="questions" class="space-y-5"></div>
+            <button id="add-question" type="button" class="btn w-full bg-violet-100 text-violet-700 mt-5">+ Tambah soal</button>
+            <button id="save-button" type="submit" class="btn w-full bg-violet-700 text-white mt-4">Simpan ke Bank Soal ✨</button>
+          </div>
+        </fieldset>
+        <p id="save-status" role="status" class="font-semibold text-violet-800 my-4 break-words"></p>
+      </form>
+    </div>
+
+    <!-- PANDUAN RULES BARU -->
+    <details class="bg-white rounded-2xl p-5 mt-6 border border-slate-200">
+      <summary class="font-bold cursor-pointer text-rose-700">⚠️ WAJIB BACA: Update Firestore Rules untuk Sistem SaaS</summary>
+      <p class="text-sm mt-3 mb-3">Salin dan timpa Firestore Rules Anda di Firebase Console dengan kode di bawah ini.</p>
+      <textarea readonly rows="16" class="field font-mono text-xs bg-slate-50" spellcheck="false">rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isSignedIn() {
-      return request.auth != null;
-    }
+    function isSignedIn() { return request.auth != null; }
+    
+    // BANK SOAL: Semua bisa baca, hanya guru yang bisa buat
     match /materials/{id} {
       allow read: if true;
-      allow create: if isSignedIn()
-        && request.resource.data.keys().hasAll(['title','questions','pdfUrl','pdfPath','ownerUid','createdAt'])
-        && request.resource.data.keys().hasOnly(['title','questions','pdfUrl','pdfPath','ownerUid','createdAt'])
-        && request.resource.data.ownerUid == request.auth.uid
-        && request.resource.data.title is string
-        && request.resource.data.title.size() > 0
-        && request.resource.data.title.size() <= 120
-        && request.resource.data.questions is list
-        && request.resource.data.questions.size() > 0
-        && request.resource.data.questions.size() <= 50
-        && request.resource.data.pdfUrl is string
-        && request.resource.data.pdfPath == 'comics/' + request.auth.uid + '/' + id + '.pdf'
-        && request.resource.data.createdAt == request.time;
-      allow update, delete: if false;
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if false; 
+    }
+
+    // SESI KELAS: Semua bisa baca status, guru pembuat bisa update (akhiri sesi)
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.teacherUid == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.teacherUid == request.auth.uid;
+      
+      // SKOR SISWA: Siswa (tanpa login) bebas kirim skor JIKA sesi masih aktif
+      match /scores/{scoreId} {
+        allow read: if isSignedIn() && get(/databases/$(database)/documents/sessions/$(sessionId)).data.teacherUid == request.auth.uid;
+        allow create: if get(/databases/$(database)/documents/sessions/$(sessionId)).data.active == true;
+      }
     }
   }
 }</textarea>
-      <label for="storage-rules" class="block font-bold mt-5 mb-2">Storage Rules</label>
-      <textarea id="storage-rules" readonly rows="12" class="field font-mono text-xs" spellcheck="false">rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    function isOwner(uid) {
-      return request.auth != null && request.auth.uid == uid;
-    }
-    match /comics/{uid}/{fileName} {
-      allow get: if true;
-      allow list: if false;
-      allow create: if isOwner(uid)
-        && request.resource.size > 0
-        && request.resource.size <= 10 * 1024 * 1024
-        && request.resource.contentType == 'application/pdf';
-      allow delete: if isOwner(uid);
-      allow update: if false;
-    }
-  }
-}</textarea>
-      <p class="text-xs text-slate-500 mt-3">Mode akses longgar: semua akun yang berhasil login dapat membuat materi. Pengunjung tanpa login hanya dapat membaca. Rules ini tidak membutuhkan koleksi users atau teachers.</p>
     </details>
   </section>
 
   <!-- DASHBOARD SISWA -->
   <section id="student" hidden aria-labelledby="student-heading">
-    <h2 id="student-heading" class="text-2xl font-black mb-3">Pilih petualangan belajarmu 🚀</h2>
-    <p class="text-slate-500 mb-5">Materi dari guru akan muncul otomatis di sini.</p>
-    <div id="material-list" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"></div>
-    <article class="bg-white rounded-3xl border border-violet-100 p-4 sm:p-6">
-      <h3 id="reading-title" class="text-xl font-bold mb-4 break-words">Ruang Baca Komik</h3>
-      <div id="pdf-placeholder" class="min-h-80 bg-gradient-to-br from-violet-100 to-sky-100 rounded-2xl flex flex-col items-center justify-center text-center p-8">
-        <div class="text-7xl mb-5" aria-hidden="true">📖</div>
-        <p class="text-xl font-bold">Cerita seru menantimu!</p>
-        <p class="text-slate-600 mt-3">Pilih materi di atas untuk membaca komik dan memulai kuis.</p>
+    
+    <!-- Area Masukkan PIN / Nama -->
+    <div id="student-join-area" class="max-w-md mx-auto bg-white p-8 rounded-3xl border border-violet-200 shadow-sm text-center mb-8">
+      <div class="text-6xl mb-4">🚀</div>
+      <h2 class="text-2xl font-black mb-2">Masuk ke Kelas</h2>
+      
+      <div id="pin-section">
+        <p class="text-slate-500 text-sm mb-6">Masukkan PIN Kelas dari guru Anda, atau klik link yang dibagikan.</p>
+        <input id="pin-input" type="text" class="field text-center text-2xl font-black tracking-widest uppercase mb-4" placeholder="PIN KELAS">
+        <button id="btn-check-pin" class="btn w-full bg-violet-700 text-white">Cari Kelas</button>
+        <p id="pin-status" class="text-sm text-rose-600 mt-3 font-bold"></p>
       </div>
+
+      <div id="identity-section" hidden>
+        <p class="text-sm font-bold text-emerald-600 bg-emerald-50 p-3 rounded-xl mb-4 border border-emerald-100" id="class-found-info">Sesi ditemukan!</p>
+        <label class="block text-left text-sm font-bold mb-2">Nama Lengkap Siswa</label>
+        <input id="student-name" type="text" class="field mb-4" placeholder="Ketik nama kamu di sini..." required>
+        <button id="btn-join-class" class="btn w-full bg-amber-400 text-slate-900 text-lg">Mulai Belajar!</button>
+      </div>
+    </div>
+
+    <!-- Area Baca & Kuis (Tersembunyi sampai siswa masuk) -->
+    <article id="student-learning-area" class="bg-white rounded-3xl border border-violet-100 p-4 sm:p-6" hidden>
+      <h3 id="reading-title" class="text-xl font-bold mb-4 break-words">Ruang Baca Komik</h3>
       <iframe id="pdf-viewer" title="PDF komik pembelajaran" hidden></iframe>
       <a id="pdf-link" target="_blank" rel="noopener" class="inline-block mt-3 text-sm text-violet-700 underline" hidden>Buka PDF di tab baru jika pembaca tidak tampil</a>
-      <div class="text-center mt-6">
-        <button id="start-quiz" class="btn bg-violet-700 text-white text-lg" disabled>⚡ Mulai Kuis Instan</button>
-        <p class="text-xs text-slate-500 mt-3">20 detik per soal · 100 poin untuk jawaban benar</p>
+      <div class="text-center mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+        <h4 class="font-bold text-lg mb-2">Sudah selesai membaca?</h4>
+        <p class="text-sm text-slate-600 mb-4">Waktunya menguji pemahamanmu. Kumpulkan poin sebanyak-banyaknya!</p>
+        <button id="start-quiz" class="btn bg-violet-700 text-white text-xl px-10 py-4 shadow-lg shadow-violet-200">⚡ Mulai Kuis Sekarang</button>
       </div>
     </article>
   </section>
-  <footer class="text-xs text-center text-slate-500 mt-10">KomikQuest · Materi online, belajar bersama.</footer>
+  <footer class="text-xs text-center text-slate-500 mt-10">KomikQuest · Platform Evaluasi Digital</footer>
 </main>
 
 <!-- MODAL KUIS -->
@@ -176,34 +181,33 @@ service firebase.storage {
   <div class="bg-violet-950 text-white p-5 sm:p-8">
     <div class="flex justify-between items-center gap-3 mb-6">
       <span class="font-bold text-violet-200">✦ TANTANGAN KOMIKQUEST</span>
-      <button id="close-quiz" class="btn bg-white/10" aria-label="Tutup kuis">✕</button>
     </div>
     <div id="quiz-play">
       <div class="flex justify-between gap-3 items-center mb-3">
         <span id="question-number"></span>
-        <span id="timer" role="timer" aria-label="Sisa waktu" class="text-2xl font-black">20 dtk</span>
+        <span id="timer" role="timer" class="text-2xl font-black">20 dtk</span>
         <span id="score" class="font-bold">0 poin</span>
       </div>
-      <progress id="timer-bar" value="20" max="20" class="w-full mb-6" aria-label="Sisa waktu menjawab"></progress>
+      <progress id="timer-bar" value="20" max="20" class="w-full mb-6"></progress>
       <h2 id="quiz-heading" tabindex="-1" class="text-2xl font-black mb-6 break-words"></h2>
       <div id="answer-options" class="grid sm:grid-cols-2 gap-4"></div>
       <p id="feedback" role="status" class="bg-white/10 rounded-2xl p-4 mt-5" hidden></p>
       <button id="next-question" class="btn w-full bg-white text-violet-900 mt-4" hidden>Soal berikutnya →</button>
     </div>
     <div id="quiz-result" class="text-center py-6" hidden>
-      <div class="text-6xl mb-5" aria-hidden="true">🏆</div>
-      <h2 id="result-heading" tabindex="-1" class="text-3xl font-black">Misi selesai!</h2>
+      <div class="text-6xl mb-5">🏆</div>
+      <h2 id="result-heading" tabindex="-1" class="text-3xl font-black">Misi Selesai!</h2>
       <p id="final-score" class="text-5xl text-amber-300 font-black my-6"></p>
-      <p id="result-summary" class="mb-6"></p>
-      <button id="retry-quiz" class="btn bg-amber-300 text-violet-950">Coba lagi</button>
-      <button id="back-reading" class="btn bg-white/10 mt-3">Kembali membaca</button>
+      <p id="result-summary" class="mb-2"></p>
+      <p id="saving-status" class="text-sm text-violet-300 font-bold mb-6">Menyimpan skor ke sistem guru...</p>
+      <button id="back-reading" class="btn bg-white/10 mt-3" hidden>Tutup</button>
     </div>
   </div>
 </dialog>
 
 <script>
 'use strict';
-// Konfigurasi Web App Firebase. Jangan memasukkan service-account private key.
+// Konfigurasi Web App Firebase Anda
 const firebaseConfig = {
   apiKey: "AIzaSyBUUFCCgKMD3YsxNXUOSwKqRM9MZjgBns4",
   authDomain: "komik-pembelajaran-digital.firebaseapp.com",
@@ -212,36 +216,19 @@ const firebaseConfig = {
   messagingSenderId: "585405533975",
   appId: "1:585405533975:web:b8e586f9d17b7561bf7152"
 };
+
 const $ = id => document.getElementById(id);
 const SDK = 'https://www.gstatic.com/firebasejs/13.1.0/';
 const MAX_PDF_BYTES = 10 * 1024 * 1024;
 const QUIZ_SECONDS = 20;
+
 let cloud = null, teacher = null, saving = false, loggingIn = false, registering = false;
-let questionId = 0;
-let materials = [], selected = null, quizLesson = null;
+let questionId = 0, materials = [], activeSessions = [];
+let currentStudentSession = null, currentStudentName = "";
 let currentQuestion = 0, points = 0, answered = false;
 let timerId = null, deadline = 0;
 
-function message(error) {
-  const known = {
-    'auth/invalid-credential': 'Email atau kata sandi tidak sesuai.',
-    'auth/email-already-in-use': 'Email sudah terdaftar. Gunakan tombol Masuk dengan akun tersebut.',
-    'auth/invalid-email': 'Format email tidak valid. Periksa kembali alamat email Anda.',
-    'auth/weak-password': 'Kata sandi terlalu lemah. Gunakan minimal 6 karakter dan ikuti kebijakan kata sandi proyek.',
-    'auth/password-does-not-meet-requirements': 'Kata sandi belum memenuhi kebijakan Firebase proyek ini. Gunakan kata sandi yang lebih kuat.',
-    'auth/missing-password': 'Masukkan kata sandi untuk membuat akun.',
-    'auth/too-many-requests': 'Terlalu banyak percobaan login. Tunggu lalu coba lagi.',
-    'auth/operation-not-allowed': 'Aktifkan Email/Password di Firebase Authentication.',
-    'auth/unauthorized-domain': 'Tambahkan domain situs pada Authorized domains.',
-    'auth/network-request-failed': 'Koneksi bermasalah. Periksa internet.',
-    'permission-denied': 'Firestore menolak akses. Login ulang dan Publish Firestore Rules terbaru pada panduan di bawah.',
-    'storage/unauthorized': 'Storage menolak akses. Publish Storage Rules terbaru, pastikan sudah login dan billing Blaze aktif.',
-    'storage/quota-exceeded': 'Kuota Storage habis. Periksa kuota dan billing.',
-    'storage/bucket-not-found': 'Bucket Storage belum tersedia. Aktifkan Storage di Console.',
-    'storage/retry-limit-exceeded': 'Unggahan terhenti. Periksa internet dan coba lagi.'
-  };
-  return known[error?.code] || error?.message || 'Operasi gagal. Periksa koneksi dan konfigurasi Firebase.';
-}
+// ================= UI ROUTING =================
 function showDashboard(name) {
   ['teacher','student'].forEach(id => {
     $(id).hidden = id !== name;
@@ -249,350 +236,423 @@ function showDashboard(name) {
     $(id+'-tab').className = 'btn '+(id === name ? 'bg-violet-700 text-white' : 'text-slate-600');
   });
 }
-$('teacher-tab').onclick = () => showDashboard('teacher');
+$('teacher-tab').onclick = () => { showDashboard('teacher'); window.history.pushState({}, '', window.location.pathname); };
 $('student-tab').onclick = () => showDashboard('student');
 $('reload').onclick = () => location.reload();
-function updateAuthUI() {
-  $('editor').disabled = !teacher || saving;
-  $('login-button').disabled = !cloud || loggingIn || registering;
-  $('register-button').disabled = !cloud || loggingIn || registering;
-  $('register-button').textContent = registering ? 'Mendaftarkan…' : 'Daftar akun';
-  $('login-form').hidden = !!cloud?.auth.currentUser;
-  $('logout-button').hidden = !cloud?.auth.currentUser;
-  $('logout-button').disabled = saving || registering;
-}
 
-// Semua pengguna yang berhasil login mendapat akses Dashboard Guru.
-// Keputusan ini tidak bergantung pada koleksi users/teachers di Firestore.
-function applyAuthenticatedUser(user) {
-  teacher = user || null;
-  $('auth-status').textContent = user
-    ? 'Login berhasil sebagai '+(user.email || user.uid)+'. Dashboard Guru siap digunakan.'
-    : 'Silakan masuk menggunakan akun Firebase Authentication.';
-  updateAuthUI();
-  if (user) showDashboard('teacher');
-}
+// Tangkap PIN dari URL jika dibagikan via Link (Kahoot style)
+window.onload = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const pin = urlParams.get('pin');
+  if(pin) {
+    showDashboard('student');
+    $('pin-input').value = pin;
+    setTimeout(() => $('btn-check-pin').click(), 1000); // Auto click cek pin
+  }
+};
 
-// 1. Firebase Auth, Firestore dan Storage.
+// ================= FIREBASE INIT & AUTH =================
 async function initFirebase() {
   try {
-    const [appSDK, a, f, s] = await Promise.all(
-      ['app','auth','firestore','storage'].map(name => import(SDK+'firebase-'+name+'.js'))
-    );
+    const [appSDK, a, f, s] = await Promise.all(['app','auth','firestore','storage'].map(name => import(SDK+'firebase-'+name+'.js')));
     const app = appSDK.initializeApp(firebaseConfig);
     const auth = a.getAuth(app);
     await a.setPersistence(auth, a.browserSessionPersistence);
     cloud = {a, f, s, auth, db:f.getFirestore(app), storage:s.getStorage(app)};
-    // Berlaku untuk login baru maupun sesi login yang dipulihkan.
-    // Tidak ada pembacaan users/{email} atau teachers/{UID}.
-    a.onAuthStateChanged(auth, applyAuthenticatedUser);
-    const query = f.query(f.collection(cloud.db,'materials'), f.orderBy('createdAt','desc'));
-    f.onSnapshot(query, {includeMetadataChanges:true}, snapshot => {
-      const entries = snapshot.docs.filter(doc => !doc.metadata.hasPendingWrites)
-        .map(doc => ({...doc.data(), id:doc.id}));
-      materials = entries.filter(validMaterial);
-      renderMaterials();
-      $('cloud-status').textContent = (snapshot.metadata.fromCache
-        ? 'Koneksi belum dikonfirmasi; menampilkan cache. '
-        : 'Terhubung ke Firestore. ')+materials.length+' materi tersedia.'+
-        (entries.length !== materials.length ? ' Ada materi dengan format berbeda yang dilewati.' : '');
-      if (selected && !materials.some(m => m.id === selected.id)) clearReading();
-    }, error => {
-      $('cloud-status').textContent = message(error);
-      $('reload').hidden = false;
+    
+    a.onAuthStateChanged(auth, user => {
+      teacher = user || null;
+      updateAuthUI();
+      if(user) {
+        showDashboard('teacher');
+        loadTeacherData(); // Load sesi & materi
+      }
     });
+
+    // Load Bank Soal Publik untuk umum/siswa/guru
+    const queryMat = f.query(f.collection(cloud.db,'materials'), f.orderBy('createdAt','desc'), f.limit(30));
+    f.onSnapshot(queryMat, snap => {
+      materials = snap.docs.map(doc => ({...doc.data(), id:doc.id}));
+      if(teacher) renderMaterials();
+      $('cloud-status').textContent = 'Terhubung ke sistem.';
+    });
+
   } catch (error) {
-    $('cloud-status').textContent = 'Firebase gagal dimuat: '+message(error);
-    $('auth-status').textContent = 'Login belum tersedia. Periksa internet dan panduan Firebase.';
-    $('reload').hidden = false;
+    $('cloud-status').textContent = 'Koneksi gagal. Muat ulang halaman.';
   }
-  updateAuthUI();
 }
-$('login-form').onsubmit = async event => {
-  event.preventDefault();
-  if (!cloud || loggingIn || registering) return;
-  loggingIn = true; updateAuthUI();
-  $('auth-status').textContent = 'Sedang masuk…';
-  try {
-    const credential = await cloud.a.signInWithEmailAndPassword(
-      cloud.auth, $('email').value.trim(), $('password').value
-    );
-    // Login berhasil: langsung aktifkan dan buka Dashboard Guru.
-    applyAuthenticatedUser(credential.user);
-  } catch (error) { $('auth-status').textContent = message(error); }
+
+function updateAuthUI() {
+  $('login-form').hidden = !!teacher;
+  $('logout-button').hidden = !teacher;
+  $('teacher-workspace').hidden = !teacher;
+  $('login-button').disabled = !cloud || loggingIn;
+  $('register-button').disabled = !cloud || loggingIn;
+  if(teacher) $('auth-status').textContent = `Login sebagai: ${teacher.email}`;
+  else $('auth-status').textContent = 'Silakan masuk untuk mengakses fitur guru.';
+}
+
+$('login-form').onsubmit = async e => {
+  e.preventDefault(); loggingIn = true; updateAuthUI();
+  try { await cloud.a.signInWithEmailAndPassword(cloud.auth, $('email').value.trim(), $('password').value); } 
+  catch (error) { alert('Gagal login: ' + (error.message || 'Periksa kredensial.')); }
   finally { loggingIn = false; $('password').value = ''; updateAuthUI(); }
 };
-// Registrasi mandiri melalui SDK Auth yang sudah dimuat dari CDN.
-// Tidak membuat dokumen users/teachers dan tidak mengubah konfigurasi Firebase.
-async function daftarGuruMandiri(email, password) {
-  if (!cloud || loggingIn || registering || cloud.auth.currentUser) return;
-  if (password.length < 6) {
-    $('auth-status').textContent = 'Kata sandi untuk akun baru minimal 6 karakter.';
-    return;
-  }
-  registering = true;
-  updateAuthUI();
-  $('auth-status').textContent = 'Membuat akun Firebase Authentication…';
-  try {
-    const credential = await cloud.a.createUserWithEmailAndPassword(
-      cloud.auth, email.trim(), password
-    );
-    // Firebase otomatis login setelah pembuatan akun berhasil.
-    applyAuthenticatedUser(credential.user);
-    $('auth-status').textContent = 'Akun berhasil dibuat untuk '+credential.user.email+'. Anda sudah masuk ke Dashboard Guru.';
-  } catch (error) {
-    $('auth-status').textContent = 'Gagal mendaftar: '+message(error);
-  } finally {
-    registering = false;
-    $('password').value = '';
-    updateAuthUI();
-  }
-}
-$('register-button').onclick = () => {
+
+$('register-button').onclick = async () => {
   if (!$('login-form').reportValidity()) return;
-  return daftarGuruMandiri($('email').value, $('password').value);
+  loggingIn = true; updateAuthUI();
+  try { await cloud.a.createUserWithEmailAndPassword(cloud.auth, $('email').value.trim(), $('password').value); } 
+  catch (error) { alert('Gagal mendaftar: ' + (error.message || 'Gunakan sandi minimal 6 karakter.')); }
+  finally { loggingIn = false; $('password').value = ''; updateAuthUI(); }
 };
 
-$('logout-button').onclick = async () => {
-  if (saving || registering || !cloud) return;
-  try { await cloud.a.signOut(cloud.auth); }
-  catch (error) { $('auth-status').textContent = message(error); }
-};
+$('logout-button').onclick = async () => { await cloud.a.signOut(cloud.auth); };
 
-// 2. Form soal dinamis. Template hanya berisi ID dan label internal.
-function addQuestion() {
-  if ($('questions').children.length >= 50) {
-    $('save-status').textContent = 'Maksimal 50 soal per materi.'; return;
-  }
-  const id = ++questionId, group = document.createElement('fieldset');
-  group.className = 'rounded-2xl border border-slate-200 bg-slate-50 p-4';
-  group.innerHTML = `
-    <legend data-number class="font-bold px-2"></legend>
-    <label for="q-${id}" class="block font-semibold text-sm mb-2">Pertanyaan</label>
-    <textarea id="q-${id}" data-question class="field mb-3" rows="2" maxlength="500" required></textarea>
-    <div class="grid sm:grid-cols-2 gap-3">
-      ${['A','B','C','D'].map(letter => `<div>
-        <label for="o-${id}-${letter}" class="block text-sm mb-1">Pilihan ${letter}</label>
-        <input id="o-${id}-${letter}" data-option class="field" maxlength="200" required>
-      </div>`).join('')}
-    </div>
-    <label for="a-${id}" class="block text-sm font-semibold mt-4 mb-2">Jawaban benar</label>
-    <select id="a-${id}" data-correct class="field" required>
-      <option value="">Pilih jawaban</option><option value="0">A</option>
-      <option value="1">B</option><option value="2">C</option><option value="3">D</option>
-    </select>
-    <button type="button" data-remove class="text-sm text-rose-700 mt-3">Hapus soal</button>`;
-  group.querySelector('[data-remove]').onclick = () => {
-    if ($('questions').children.length === 1) {
-      $('save-status').textContent = 'Minimal satu soal diperlukan.'; return;
-    }
-    group.remove(); renumberQuestions();
-  };
-  $('questions').append(group); renumberQuestions();
-  return group;
-}
-function renumberQuestions() {
-  [...$('questions').children].forEach((g,i) => g.querySelector('[data-number]').textContent = 'Soal '+(i+1));
-}
-$('add-question').onclick = () => addQuestion()?.querySelector('[data-question]').focus();
-$('pdf-file').onchange = () => {
-  const file = $('pdf-file').files[0];
-  $('file-name').textContent = file ? `${file.name} · ${(file.size/1024/1024).toFixed(2)} MB` : 'Belum ada PDF.';
-};
 
-// 3. Upload PDF, kemudian simpan dokumen Firestore. Tidak hanya console.log.
-async function saveLesson(title, questions, file) {
-  if (!cloud || !teacher) throw new Error('Silakan login sebagai guru.');
-  const {f,s,db,storage} = cloud;
-  const uid = teacher.uid;
-  const record = f.doc(f.collection(db,'materials'));
-  const pdfPath = `comics/${uid}/${record.id}.pdf`;
-  const reference = s.ref(storage, pdfPath);
-  let uploaded = false, committing = false;
-  try {
-    await new Promise((resolve,reject) => {
-      const upload = s.uploadBytesResumable(reference, file, {
-        contentType:'application/pdf', contentDisposition:'inline'
-      });
-      upload.on('state_changed', snapshot => {
-        const percent = Math.round(snapshot.bytesTransferred/snapshot.totalBytes*100);
-        $('save-status').textContent = `Mengunggah PDF… ${percent}%`;
-      }, reject, resolve);
-    });
-    uploaded = true;
-    const pdfUrl = await s.getDownloadURL(reference);
-    $('save-status').textContent = 'Menyimpan judul dan soal ke Firestore…';
-    committing = true;
-    await f.setDoc(record, {
-      title, questions, pdfUrl, pdfPath, ownerUid:uid,
-      createdAt:f.serverTimestamp()
-    });
-    return record.id;
-  } catch (error) {
-    // Storage dan Firestore tidak memiliki transaksi lintas layanan.
-    // Bersihkan file hanya jika dokumen pasti belum tersimpan.
-    let extra = '';
-    const rejected = ['permission-denied','invalid-argument','unauthenticated'].includes(error.code);
-    if (uploaded && (!committing || rejected)) {
-      try { await s.deleteObject(reference); }
-      catch { extra = ' Hapus unggahan sisa di Storage: '+pdfPath; }
-    } else if (committing) {
-      extra = ' Status simpan belum pasti. Periksa materials/'+record.id+' di Console sebelum mencoba ulang.';
-    }
-    throw new Error(message(error)+extra);
-  }
-}
-$('lesson-form').onsubmit = async event => {
-  event.preventDefault();
-  if (saving) return;
-  if (!teacher) { $('save-status').textContent = 'Login sebagai guru terlebih dahulu.'; return; }
-  const title = $('lesson-title').value.trim(), file = $('pdf-file').files[0];
-  const questions = [...$('questions').children].map(group => ({
-    question:group.querySelector('[data-question]').value.trim(),
-    options:[...group.querySelectorAll('[data-option]')].map(input => input.value.trim()),
-    correctAnswer:Number(group.querySelector('[data-correct]').value)
-  }));
-  if (!title || title.length > 120 || !validQuestions(questions)) {
-    $('save-status').textContent = 'Lengkapi judul dan seluruh soal. Isian tidak boleh hanya spasi.'; return;
-  }
-  if (!file || !/\.pdf$/i.test(file.name) || file.size === 0 || file.size > MAX_PDF_BYTES) {
-    $('save-status').textContent = 'Pilih PDF maksimal 10 MB.'; return;
-  }
-  saving = true; updateAuthUI();
-  $('save-status').textContent = 'Memeriksa PDF…';
-  try {
-    if (await file.slice(0,5).text() !== '%PDF-') throw new Error('Berkas tidak memiliki header PDF yang valid.');
-    const id = await saveLesson(title, questions, file);
-    event.target.reset();
-    $('questions').replaceChildren(); addQuestion();
-    $('file-name').textContent = 'Belum ada PDF.';
-    $('save-status').textContent = 'Berhasil! Materi tersimpan di Firestore (ID: '+id+'). Siswa dapat membukanya melalui situs ini.';
-  } catch (error) { $('save-status').textContent = message(error); }
-  finally { saving = false; updateAuthUI(); }
-};
-
-// 4. Katalog siswa. Teks dari database tidak dimasukkan ke innerHTML.
-function validQuestions(items) {
-  return Array.isArray(items) && items.length > 0 && items.length <= 50 && items.every(q =>
-    q && typeof q.question === 'string' && q.question.trim().length > 0 && q.question.length <= 500 &&
-    Array.isArray(q.options) && q.options.length === 4 &&
-    q.options.every(o => typeof o === 'string' && o.trim().length > 0 && o.length <= 200) &&
-    Number.isInteger(q.correctAnswer) && q.correctAnswer >= 0 && q.correctAnswer <= 3);
-}
-function validMaterial(m) {
-  if (!m || typeof m.title !== 'string' || !m.title.trim() || !validQuestions(m.questions)) return false;
-  try {
-    const url = new URL(m.pdfUrl);
-    return url.protocol === 'https:' && url.hostname === 'firebasestorage.googleapis.com' &&
-      url.pathname.startsWith('/v0/b/'+firebaseConfig.storageBucket+'/o/');
-  } catch { return false; }
-}
-function element(tag,text,className) {
-  const node = document.createElement(tag); node.textContent = text; node.className = className; return node;
-}
-function renderMaterials() {
-  $('material-list').replaceChildren();
-  if (!materials.length) {
-    $('material-list').append(element('p','Belum ada materi yang bisa ditampilkan.','text-slate-500')); return;
-  }
-  materials.forEach(material => {
-    const card = element('article','','bg-white border border-violet-100 rounded-2xl p-5');
-    card.append(element('p','📚 KOMIK & KUIS','text-xs font-bold text-violet-600 mb-3'));
-    card.append(element('h3',material.title,'text-lg font-bold mb-2 break-words'));
-    card.append(element('p',material.questions.length+' soal · 20 detik per soal','text-sm text-slate-500 mb-4'));
-    const button = element('button','Baca komik →','btn bg-violet-100 text-violet-800');
-    button.onclick = () => selectMaterial(material);
-    card.append(button); $('material-list').append(card);
+// ================= FITUR GURU: BUAT SOAL & SESI =================
+function loadTeacherData() {
+  // Dengarkan Sesi Aktif milik Guru ini
+  const q = cloud.f.query(cloud.f.collection(cloud.db, 'sessions'), 
+    cloud.f.where('teacherUid', '==', teacher.uid),
+    cloud.f.where('active', '==', true)
+  );
+  cloud.f.onSnapshot(q, snap => {
+    activeSessions = snap.docs.map(d => ({...d.data(), id:d.id}));
+    renderActiveSessions();
   });
 }
-function selectMaterial(material) {
-  selected = material;
-  $('reading-title').textContent = 'Ruang Baca Komik — '+material.title;
-  $('pdf-viewer').src = material.pdfUrl;
-  $('pdf-viewer').hidden = false; $('pdf-placeholder').hidden = true;
-  $('pdf-link').href = material.pdfUrl; $('pdf-link').hidden = false;
-  $('start-quiz').disabled = false;
-}
-function clearReading() {
-  selected = null; $('pdf-viewer').removeAttribute('src'); $('pdf-viewer').hidden = true;
-  $('pdf-placeholder').hidden = false; $('pdf-link').hidden = true;
-  $('start-quiz').disabled = true; $('reading-title').textContent = 'Ruang Baca Komik';
+
+function renderMaterials() {
+  const container = $('material-list');
+  container.replaceChildren();
+  materials.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'bg-white border border-violet-100 rounded-2xl p-5 shadow-sm';
+    card.innerHTML = `
+      <h4 class="font-bold text-lg mb-1 truncate" title="${m.title}">${m.title}</h4>
+      <p class="text-xs text-slate-500 mb-4">${m.questions.length} Soal</p>
+      <button class="btn w-full bg-violet-100 text-violet-800 text-sm py-2 hover:bg-violet-200">✨ Buat Kelas Baru</button>
+    `;
+    card.querySelector('button').onclick = () => buatSesiBaru(m);
+    container.append(card);
+  });
 }
 
-// 5. Kuis dengan timer 20 detik per soal.
+async function buatSesiBaru(material) {
+  if(!confirm(`Buka kelas untuk materi: ${material.title}?`)) return;
+  const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 Jam
+  
+  try {
+    const ref = await cloud.f.addDoc(cloud.f.collection(cloud.db, 'sessions'), {
+      materialId: material.id,
+      materialTitle: material.title,
+      teacherUid: teacher.uid,
+      teacherEmail: teacher.email,
+      expiresAt: expiresAt,
+      active: true,
+      createdAt: cloud.f.serverTimestamp()
+    });
+    
+    const link = `${window.location.origin}${window.location.pathname}?pin=${ref.id}`;
+    prompt("Kelas berhasil dibuka!\nSalin dan bagikan link ini ke siswa Anda:", link);
+  } catch(e) { alert("Gagal membuat kelas: " + e.message); }
+}
+
+function renderActiveSessions() {
+  const container = $('active-sessions-list');
+  if(!activeSessions.length) {
+    container.innerHTML = '<p class="text-slate-500 text-sm col-span-full">Tidak ada kelas aktif saat ini.</p>';
+    return;
+  }
+  container.replaceChildren();
+  
+  activeSessions.forEach(sesi => {
+    // Cek apakah kadaluarsa (24 jam)
+    const sisaWaktu = sesi.expiresAt - Date.now();
+    if(sisaWaktu <= 0) { akhiriSesi(sesi.id, sesi.materialTitle, true); return; } // Auto tutup jika lewat
+
+    const jam = Math.floor(sisaWaktu / (1000 * 60 * 60));
+    
+    const card = document.createElement('div');
+    card.className = 'bg-violet-50 border border-violet-200 rounded-2xl p-5 relative overflow-hidden';
+    card.innerHTML = `
+      <div class="absolute top-0 right-0 bg-rose-500 text-white text-xs px-2 py-1 font-bold rounded-bl-lg">PIN: ${sesi.id}</div>
+      <h4 class="font-bold text-lg mb-1 pr-16 truncate" title="${sesi.materialTitle}">${sesi.materialTitle}</h4>
+      <p class="text-xs text-violet-600 font-bold mb-4">Sisa waktu: ${jam} jam</p>
+      <div class="flex gap-2">
+        <button class="btn bg-white border border-slate-200 text-slate-700 text-xs py-2 flex-1 hover:bg-slate-50" onclick="navigator.clipboard.writeText('${window.location.origin}${window.location.pathname}?pin=${sesi.id}'); alert('Link disalin!')">📋 Copy Link</button>
+        <button class="btn bg-rose-600 text-white text-xs py-2 flex-1 hover:bg-rose-700 akhiri-btn">🛑 Akhiri & Rekap</button>
+      </div>
+    `;
+    card.querySelector('.akhiri-btn').onclick = () => akhiriSesi(sesi.id, sesi.materialTitle, false);
+    container.append(card);
+  });
+}
+
+// ================= LOGIKA PENGIRIMAN EMAIL CLOUDFLARE WORKERS =================
+async function akhiriSesi(sessionId, title, autoExpired) {
+  if(!autoExpired && !confirm(`Akhiri sesi kelas "${title}" sekarang?\nAkses siswa akan ditutup dan rekap nilai dikirim ke email Anda.`)) return;
+  
+  try {
+    // 1. Matikan Sesi (Non-aktif)
+    await cloud.f.updateDoc(cloud.f.doc(cloud.db, 'sessions', sessionId), { active: false });
+
+    // 2. Tarik Data Nilai Siswa
+    const snaps = await cloud.f.getDocs(cloud.f.collection(cloud.db, 'sessions', sessionId, 'scores'));
+    let scores = [];
+    snaps.forEach(d => scores.push(d.data()));
+    scores.sort((a, b) => b.skor - a.skor); // Urutkan skor tertinggi
+
+    // 3. Rakit Format Email HTML
+    let rowsHtml = scores.map((s, i) => `
+      <tr>
+        <td style="padding:8px; border-bottom:1px solid #ddd;">${i+1}</td>
+        <td style="padding:8px; border-bottom:1px solid #ddd;"><b>${s.nama}</b></td>
+        <td style="padding:8px; border-bottom:1px solid #ddd; color:#4c1d95; font-weight:bold;">${s.skor}</td>
+      </tr>
+    `).join('');
+    
+    if(scores.length === 0) rowsHtml = `<tr><td colspan="3" style="padding:8px; text-align:center;">Tidak ada siswa yang berpartisipasi.</td></tr>`;
+
+    const htmlBody = `
+      <div style="font-family:sans-serif; color:#333; max-width:600px; margin:0 auto; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+        <div style="background:#5b21b6; color:white; padding:20px; text-align:center;">
+          <h2 style="margin:0;">Rekap Nilai KomikQuest</h2>
+          <p style="margin:5px 0 0 0; opacity:0.8;">Materi: ${title}</p>
+        </div>
+        <div style="padding:20px;">
+          <p>Halo Guru,</p>
+          <p>Sesi kelas Anda telah diakhiri. Berikut adalah rekapitulasi nilai siswa:</p>
+          <table style="width:100%; border-collapse:collapse; text-align:left; margin-top:15px;">
+            <tr style="background:#f8fafc;">
+              <th style="padding:10px; border-bottom:2px solid #cbd5e1;">Peringkat</th>
+              <th style="padding:10px; border-bottom:2px solid #cbd5e1;">Nama Siswa</th>
+              <th style="padding:10px; border-bottom:2px solid #cbd5e1;">Skor Akhir</th>
+            </tr>
+            ${rowsHtml}
+          </table>
+          <p style="margin-top:20px; font-size:12px; color:#64748b;">Dicatat otomatis oleh sistem pada ${new Date().toLocaleString('id-ID')}.</p>
+        </div>
+      </div>
+    `;
+
+    // 4. Kirim data rekap ke Cloudflare Worker
+    const workerURL = "https://komikquest-mailer.wildanfarisid12.workers.dev/"; 
+    
+    await fetch(workerURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        emailTujuan: teacher.email,
+        subject: `[Rekap Nilai] Sesi Kelas: ${title}`,
+        htmlContent: htmlBody
+      })
+    });
+    
+    if(!autoExpired) alert("Sesi ditutup! Rekap nilai sedang dikirim ke " + teacher.email);
+
+  } catch(e) { alert("Gagal mengakhiri sesi: " + e.message); }
+}
+
+// FORM PEMBUATAN SOAL
+function addQuestion() {
+  const id = ++questionId, g = document.createElement('fieldset');
+  g.className = 'rounded-2xl border border-slate-200 bg-slate-50 p-4 relative';
+  g.innerHTML = `
+    <span class="absolute top-2 right-4 text-xs font-bold text-slate-400" data-num></span>
+    <label class="block font-semibold text-sm mb-2">Pertanyaan</label>
+    <textarea data-q class="field mb-3" rows="2" required></textarea>
+    <div class="grid sm:grid-cols-2 gap-3 mb-3">
+      ${['A','B','C','D'].map(l => `<div><label class="text-xs font-bold mb-1 block">Opsi ${l}</label><input data-o class="field text-sm" required></div>`).join('')}
+    </div>
+    <label class="block text-sm font-semibold mb-2">Kunci Jawaban</label>
+    <select data-a class="field text-sm" required><option value="">Pilih...</option><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
+    <button type="button" class="text-xs text-rose-600 font-bold mt-2 hover:underline" onclick="this.parentElement.remove(); updateQNum()">Hapus Soal</button>
+  `;
+  $('questions').append(g); updateQNum();
+}
+function updateQNum() { [...$('questions').children].forEach((g,i) => g.querySelector('[data-num]').textContent = 'Soal '+(i+1)); }
+$('add-question').onclick = addQuestion;
+addQuestion();
+
+$('lesson-form').onsubmit = async e => {
+  e.preventDefault(); if(saving) return;
+  const file = $('pdf-file').files[0], title = $('lesson-title').value.trim();
+  const qList = [...$('questions').children].map(g => ({
+    question: g.querySelector('[data-q]').value,
+    options: [...g.querySelectorAll('[data-o]')].map(i => i.value),
+    correctAnswer: Number(g.querySelector('[data-a]').value)
+  }));
+  
+  if(!file || qList.length === 0) return alert("Lengkapi file dan soal!");
+  
+  saving = true; $('save-status').textContent = 'Mengunggah & Menyimpan...'; $('editor').disabled = true;
+  try {
+    const docRef = cloud.f.doc(cloud.f.collection(cloud.db,'materials'));
+    const pdfPath = `comics/${docRef.id}.pdf`;
+    const ref = cloud.s.ref(cloud.storage, pdfPath);
+    await cloud.s.uploadBytes(ref, file, {contentType:'application/pdf'});
+    const pdfUrl = await cloud.s.getDownloadURL(ref);
+    
+    await cloud.f.setDoc(docRef, {
+      title, questions: qList, pdfUrl, pdfPath, ownerUid: teacher.uid, createdAt: cloud.f.serverTimestamp()
+    });
+    
+    $('save-status').textContent = 'Materi berhasil ditambahkan ke Bank Soal!';
+    e.target.reset(); $('questions').replaceChildren(); addQuestion();
+    setTimeout(() => $('save-status').textContent = '', 3000);
+  } catch(err) { $('save-status').textContent = 'Error: ' + err.message; }
+  finally { saving = false; $('editor').disabled = false; }
+};
+
+
+// ================= FITUR SISWA: GABUNG & KUIS =================
+$('btn-check-pin').onclick = async () => {
+  const pin = $('pin-input').value.trim();
+  if(!pin) return;
+  
+  $('pin-status').textContent = 'Mencari kelas...';
+  try {
+    const docSnap = await cloud.f.getDoc(cloud.f.doc(cloud.db, 'sessions', pin));
+    if(!docSnap.exists() || docSnap.data().active === false || docSnap.data().expiresAt < Date.now()) {
+      $('pin-status').textContent = '❌ Kelas tidak ditemukan atau sudah ditutup.';
+      return;
+    }
+    
+    const sesi = docSnap.data();
+    
+    // Tarik data materi berdasarkan ID
+    const matSnap = await cloud.f.getDoc(cloud.f.doc(cloud.db, 'materials', sesi.materialId));
+    if(!matSnap.exists()) throw new Error("Materi terhapus dari bank soal.");
+    
+    currentStudentSession = { id: pin, material: matSnap.data() };
+    
+    $('pin-status').textContent = '';
+    $('pin-section').hidden = true;
+    $('class-found-info').textContent = `Materi: ${sesi.materialTitle}`;
+    $('identity-section').hidden = false;
+
+  } catch (error) {
+    $('pin-status').textContent = 'Terjadi kesalahan sistem.';
+  }
+};
+
+$('btn-join-class').onclick = () => {
+  const nama = $('student-name').value.trim();
+  if(!nama) { alert("Nama wajib diisi!"); return; }
+  
+  currentStudentName = nama;
+  $('student-join-area').hidden = true;
+  $('student-learning-area').hidden = false;
+  
+  const m = currentStudentSession.material;
+  $('reading-title').textContent = m.title;
+  $('pdf-viewer').src = m.pdfUrl;
+  $('pdf-viewer').hidden = false;
+  $('pdf-link').href = m.pdfUrl; $('pdf-link').hidden = false;
+};
+
+// Logika Kuis (Game Loop)
 function stopTimer() { if (timerId !== null) clearInterval(timerId); timerId = null; }
 function tickTimer() {
   if (answered || !$('quiz-dialog').open) return;
   const remaining = Math.max(0,Math.ceil((deadline-Date.now())/1000));
   $('timer').textContent = remaining+' dtk'; $('timer-bar').value = remaining;
-  $('timer').classList.toggle('text-rose-300', remaining <= 5);
   if (remaining === 0) submitAnswer(null);
 }
-function startQuiz() {
-  if (!selected) return;
-  stopTimer(); quizLesson = selected; currentQuestion = 0; points = 0;
+
+$('start-quiz').onclick = () => {
+  if (!currentStudentSession) return;
+  $('student-learning-area').hidden = true;
+  currentQuestion = 0; points = 0;
   $('quiz-result').hidden = true; $('quiz-play').hidden = false;
-  $('quiz-dialog').setAttribute('aria-labelledby','quiz-heading');
-  if (!$('quiz-dialog').open) $('quiz-dialog').showModal();
+  $('quiz-dialog').showModal();
   renderQuestion();
-}
+};
+
 function renderQuestion() {
   stopTimer(); answered = false;
-  const question = quizLesson.questions[currentQuestion];
-  $('question-number').textContent = `Soal ${currentQuestion+1} / ${quizLesson.questions.length}`;
-  $('score').textContent = points+' poin'; $('quiz-heading').textContent = question.question;
-  $('answer-options').replaceChildren(); $('feedback').hidden = true; $('next-question').hidden = true;
+  const qList = currentStudentSession.material.questions;
+  const qData = qList[currentQuestion];
+  
+  $('question-number').textContent = `Soal ${currentQuestion+1} / ${qList.length}`;
+  $('score').textContent = points+' poin'; 
+  $('quiz-heading').textContent = qData.question;
+  
+  const optContainer = $('answer-options');
+  optContainer.replaceChildren(); $('feedback').hidden = true; $('next-question').hidden = true;
+  
   const colors = ['#be123c','#1d4ed8','#a16207','#047857'];
-  question.options.forEach((option,i) => {
-    const button = element('button',['▲ A','◆ B','● C','■ D'][i]+'. '+option,'answer');
-    button.style.backgroundColor = colors[i]; button.onclick = () => submitAnswer(i);
-    $('answer-options').append(button);
+  qData.options.forEach((opt,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer';
+    btn.style.backgroundColor = colors[i];
+    btn.textContent = ['A','B','C','D'][i] + '. ' + opt;
+    btn.onclick = () => submitAnswer(i);
+    optContainer.append(btn);
   });
+  
   deadline = Date.now()+QUIZ_SECONDS*1000; tickTimer(); timerId = setInterval(tickTimer,100);
-  $('quiz-heading').focus();
 }
+
 function submitAnswer(choice) {
   if (answered) return;
-  if (Date.now() >= deadline) choice = null;
   answered = true; stopTimer();
-  const question = quizLesson.questions[currentQuestion], correct = choice === question.correctAnswer;
+  
+  const qData = currentStudentSession.material.questions[currentQuestion];
+  const correct = choice === qData.correctAnswer;
   if (correct) points += 100;
-  [...$('answer-options').children].forEach((button,i) => {
-    button.disabled = true;
-    if (i === question.correctAnswer) button.classList.add('correct');
-    else if (i === choice) button.classList.add('wrong');
+  
+  [...$('answer-options').children].forEach((btn,i) => {
+    btn.disabled = true;
+    if (i === qData.correctAnswer) btn.classList.add('correct');
+    else if (i === choice) btn.classList.add('wrong');
   });
-  $('feedback').textContent = (choice === null ? '⏰ Waktu habis! ' : correct ? '🎉 Benar! +100 poin. ' : '💪 Belum tepat. ')+
-    'Jawaban: '+'ABCD'[question.correctAnswer]+'. '+question.options[question.correctAnswer];
+  
+  $('feedback').textContent = (choice === null ? '⏰ Waktu habis! ' : correct ? '🎉 Benar! +100 poin. ' : '💪 Kurang tepat. ')+
+    'Jawaban: '+'ABCD'[qData.correctAnswer]+'. '+qData.options[qData.correctAnswer];
   $('feedback').hidden = false; $('score').textContent = points+' poin';
-  $('next-question').textContent = currentQuestion === quizLesson.questions.length-1 ? 'Lihat hasil 🏆' : 'Soal berikutnya →';
-  $('next-question').hidden = false; $('next-question').focus();
+  
+  $('next-question').textContent = currentQuestion === currentStudentSession.material.questions.length-1 ? 'Lihat Hasil Akhir 🏆' : 'Lanjut →';
+  $('next-question').hidden = false;
 }
-$('next-question').onclick = () => {
+
+$('next-question').onclick = async () => {
   if (!answered) return;
   currentQuestion++;
-  if (currentQuestion < quizLesson.questions.length) renderQuestion();
+  if (currentQuestion < currentStudentSession.material.questions.length) renderQuestion();
   else {
     stopTimer(); $('quiz-play').hidden = true; $('quiz-result').hidden = false;
-    $('quiz-dialog').setAttribute('aria-labelledby','result-heading');
-    $('final-score').textContent = points+' poin';
-    $('result-summary').textContent = `${points/100} dari ${quizLesson.questions.length} jawaban benar. Terus berlatih, ya!`;
-    $('result-heading').focus();
+    $('final-score').textContent = points+' Poin';
+    
+    // SIMPAN SKOR KE DATABASE SESI GURU
+    try {
+      await cloud.f.addDoc(cloud.f.collection(cloud.db, 'sessions', currentStudentSession.id, 'scores'), {
+        nama: currentStudentName,
+        skor: points,
+        waktuSelesai: cloud.f.serverTimestamp()
+      });
+      $('saving-status').textContent = '✅ Skor berhasil terekam di sistem guru.';
+      $('saving-status').className = 'text-sm text-emerald-400 font-bold mb-6';
+      $('back-reading').hidden = false;
+    } catch (e) {
+      $('saving-status').textContent = '⚠️ Sesi telah ditutup, skor gagal dikirim.';
+      $('saving-status').className = 'text-sm text-rose-400 font-bold mb-6';
+    }
   }
 };
-function closeQuiz() { stopTimer(); $('quiz-dialog').close(); }
-$('start-quiz').onclick = startQuiz; $('retry-quiz').onclick = startQuiz;
-$('close-quiz').onclick = closeQuiz; $('back-reading').onclick = closeQuiz;
-$('quiz-dialog').addEventListener('cancel',stopTimer);
-$('quiz-dialog').addEventListener('close',() => { stopTimer(); if (selected) $('start-quiz').focus(); });
-document.addEventListener('visibilitychange',() => { if (timerId !== null) tickTimer(); });
-window.addEventListener('pagehide',stopTimer);
-window.addEventListener('pageshow',() => {
-  if ($('quiz-dialog').open && !$('quiz-play').hidden && !answered) {
-    stopTimer(); tickTimer(); if (!answered) timerId = setInterval(tickTimer,100);
-  }
-});
-addQuestion();
+
+$('back-reading').onclick = () => {
+  $('quiz-dialog').close();
+  $('student-join-area').hidden = false;
+  $('identity-section').hidden = true;
+  $('pin-section').hidden = false;
+  $('student-name').value = '';
+  $('pin-input').value = '';
+  window.history.pushState({}, '', window.location.pathname);
+};
+
 initFirebase();
 </script>
 </body>
